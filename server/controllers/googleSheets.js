@@ -35,7 +35,9 @@ async function updateGoogleSheet(userData, isAbstractSubmission = false) {
 
       // ✅ Find if an abstract with the same email exists
       const existingAbstractRow = abstractRows.find(
-        row => row.Email.trim().toLowerCase() === userData.email.trim().toLowerCase()
+        row => row.Email && 
+        typeof row.Email === "string" && 
+        row.Email.trim().toLowerCase() === userData.email.trim().toLowerCase()
       );
 
       if (existingAbstractRow) {
