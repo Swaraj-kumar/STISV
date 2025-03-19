@@ -27,7 +27,7 @@ async function updateGoogleSheet(userData, isAbstractSubmission = false) {
     // ✅ Check if the user already exists in Google Sheets
     // ✅ Check if the user already exists in Google Sheets
     const existingRow = rows.find(row => 
-      row.Email.trim().toLowerCase() === userData.email.trim().toLowerCase() &&
+      row.Email && row.Email.trim().toLowerCase() === userData.email.trim().toLowerCase() &&
       (!row.Abstract_Title || row.Abstract_Title === "N/A") // Only update if no abstract exists
     );
     console.log("🔍 Searching for user:", userData.email);
