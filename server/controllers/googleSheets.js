@@ -57,6 +57,7 @@ async function updateGoogleSheet(userData, isAbstractSubmission = false) {
           Full_Name: userData.fullName,
           Email: userData.email,
           Abstract_Title: userData.abstractSubmission?.title || "N/A",
+          Abstract : userData.abstractSubmission?.mainBody || "N/A",
           Abstract_Scope: userData.abstractSubmission?.scope || "N/A",
           Abstract_PresentingType: userData.abstractSubmission?.presentingType || "N/A",
           Abstract_File: userData.abstractSubmission?.abstractFile || "N/A",
