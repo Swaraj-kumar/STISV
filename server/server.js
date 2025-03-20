@@ -419,37 +419,62 @@ try {
   }
 });
 
-app.put("/update-abstract", verifyToken, async (req, res) => {
+app.put("/update-abstract", verifyToken, upload.single("abstractFile"), async (req, res) => {
   try {
-    const { uid, title, scope, presentingType, abstractFile } = req.body;
+    const uid = req.body.uid;
+    if (!uid) return res.status(400).json({ message: "User ID is required" });
 
-    console.log("🔹 Received update request for UID:", uid);
-    console.log("📄 New Abstract Title:", title);
-    console.log("📜 New Theme/Scope:", scope);
-    console.log("🎤 New Presenting Type:", presentingType);
-    console.log("📎 New Abstract File:", abstractFile);
+    console.log(`🔹 Updating abstract for UID: ${uid}`);
 
-    if (!uid) {
-      return res.status(400).json({ message: "User ID is required" });
+    let updateData = {};
+    let googleSheetUpdateRequired = false; // ✅ Prevent unnecessary Google Sheets updates
+
+    // ✅ Update Only Provided Fields
+    ["title", "scope", "presentingType", "firstAuthorName", "firstAuthorAffiliation",
+     "otherAuthors", "presentingAuthorName", "presentingAuthorAffiliation", "mainBody"]
+    .forEach(field => {
+      if (req.body[field]) {
+        updateData[`abstractSubmission.${field}`] = req.body[field];
+        googleSheetUpdateRequired = true;
+      }
+    });
+
+    // ✅ Handle File Upload
+    if (req.file) {
+      console.log("📎 Uploading new abstract file...");
+
+      const uploadToCloudinary = () => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { resource_type: "auto", folder: "abstracts" },
+            (error, result) => (error ? reject(error) : resolve(result))
+          );
+          stream.end(req.file.buffer);
+        });
+      };
+
+      const cloudinaryResult = await uploadToCloudinary();
+      updateData["abstractSubmission.abstractFile"] = cloudinaryResult.secure_url;
+      console.log(`✅ New File Uploaded: ${cloudinaryResult.secure_url}`);
+      googleSheetUpdateRequired = true;
     }
 
-    const user = await User.findOne({ uid });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: "No valid fields provided for update." });
     }
 
-    // ✅ Ensure abstracts are updated properly
-    user.abstractSubmission.title = title;
-    user.abstractSubmission.scope = scope;
-    user.abstractSubmission.presentingType = presentingType;
-    if (abstractFile) user.abstractSubmission.abstractFile = abstractFile;
+    // ✅ Update MongoDB
+    const user = await User.findOneAndUpdate({ uid }, { $set: updateData }, { new: true });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    await user.save();
+    console.log("✅ Abstract updated successfully in MongoDB!");
 
-    console.log("✅ Abstract updated successfully in MongoDB");
-
-    // ✅ Update Google Sheets after MongoDB update
-    await updateGoogleSheet(user, true);
+    // ✅ Update Google Sheets Only If Data Changed
+    if (googleSheetUpdateRequired) {
+      console.log("🔄 Updating Google Sheets...");
+      await updateGoogleSheet(user, true);
+      console.log("✅ Google Sheets updated successfully!");
+    }
 
     res.json({ message: "Abstract updated successfully", abstract: user.abstractSubmission });
 
@@ -458,6 +483,7 @@ app.put("/update-abstract", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
+
 
 
 app.delete("/delete-abstract-file", verifyToken, async (req, res) => {

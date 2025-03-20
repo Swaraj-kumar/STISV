@@ -13,7 +13,7 @@ const AbstractSubmissionStatus = () => {
   const [editMode, setEditMode] = useState(false);
   const [updatedAbstract, setUpdatedAbstract] = useState({});
   const [newFile, setNewFile] = useState(null); // ✅ Handle file uploads
-  
+
   // Retrieve token and UID from sessionStorage
   const token = sessionStorage.getItem("token");
   const uid = sessionStorage.getItem("uid");
@@ -51,40 +51,59 @@ const AbstractSubmissionStatus = () => {
   // Handle Abstract Updates
   const handleUpdate = async () => {
     setUpdating(true);
-  
+
     try {
       const formData = new FormData();
       formData.append("uid", uid); // ✅ Send UID
-      formData.append("title", updatedAbstract.title);
-      formData.append("scope", updatedAbstract.scope);
-      formData.append("presentingType", updatedAbstract.presentingType);
-      formData.append("firstAuthorName", updatedAbstract.firstAuthorName);
-      formData.append("firstAuthorAffiliation", updatedAbstract.firstAuthorAffiliation);
-      formData.append("otherAuthors", updatedAbstract.otherAuthors);
-      formData.append("presentingAuthorName", updatedAbstract.presentingAuthorName);
-      formData.append("presentingAuthorAffiliation", updatedAbstract.presentingAuthorAffiliation);
-      formData.append("mainBody", updatedAbstract.mainBody);
-  
+
+      let hasUpdates = false;
+
+      // ✅ Append only changed fields
+      [
+        "title",
+        "theme",
+        "presentingType",
+        "firstAuthorName",
+        "firstAuthorAffiliation",
+        "otherAuthors",
+        "presentingAuthorName",
+        "presentingAuthorAffiliation",
+        "mainBody"
+      ].forEach((field) => {
+        if (updatedAbstract[field] !== abstract[field]) {
+          formData.append(field, updatedAbstract[field]);
+          hasUpdates = true;
+        }
+      });
+
+      // ✅ Handle File Upload
       if (newFile) {
         formData.append("abstractFile", newFile);
+        hasUpdates = true;
       }
-  
+
+      if (!hasUpdates) {
+        setError("No changes made.");
+        setUpdating(false);
+        return;
+      }
+
       await axios.put(
         `https://stisv.onrender.com/update-abstract`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-  
+
       setAbstract(updatedAbstract);
       setEditMode(false);
       setNewFile(null); // ✅ Clear file input after upload
+      setError(null);
     } catch (error) {
       setError("Error updating abstract.");
     } finally {
       setUpdating(false);
     }
   };
-  
 
   // Handle File Upload
   const handleFileChange = (e) => {
@@ -128,58 +147,52 @@ const AbstractSubmissionStatus = () => {
       {abstract ? (
         <div className="abstract-details">
           {/* ✅ Abstract Details */}
-          <div className="abstract-row">
-            <strong>Title:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                value={updatedAbstract.title}
-                onChange={(e) => setUpdatedAbstract({ ...updatedAbstract, title: e.target.value })}
-              />
-            ) : (
-              <span>{abstract.title}</span>
-            )}
-          </div>
-
-          <div className="abstract-row">
-            <strong>Theme:</strong>
-            {editMode ? (
-              <input
-                type="text"
-                value={updatedAbstract.scope}
-                onChange={(e) => setUpdatedAbstract({ ...updatedAbstract, scope: e.target.value })}
-              />
-            ) : (
-              <span>{abstract.scope}</span>
-            )}
-          </div>
-
-          <div className="abstract-row">
-            <strong>Presenting Type:</strong>
-            {editMode ? (
-              <select
-                value={updatedAbstract.presentingType}
-                onChange={(e) => setUpdatedAbstract({ ...updatedAbstract, presentingType: e.target.value })}
-              >
-                <option value="Oral">Oral</option>
-                <option value="Poster">Poster</option>
-              </select>
-            ) : (
-              <span>{abstract.presentingType}</span>
-            )}
-          </div>
+          {[
+            { label: "Title", key: "title" },
+            { label: "Theme", key: "theme" },
+            { label: "Mode of Presentation", key: "presentingType", type: "select", options: ["Oral", "Poster"] },
+            { label: "First Author Name", key: "firstAuthorName" },
+            { label: "First Author Affiliation", key: "firstAuthorAffiliation" },
+            { label: "Other Authors", key: "otherAuthors", type: "textarea" },
+            { label: "Presenting Author Name", key: "presentingAuthorName" },
+            { label: "Presenting Author Affiliation", key: "presentingAuthorAffiliation" },
+            { label: "Main Body", key: "mainBody", type: "textarea" }
+          ].map((field) => (
+            <div className="abstract-row" key={field.key}>
+              <strong>{field.label}:</strong>
+              {editMode ? (
+                field.type === "select" ? (
+                  <select
+                    value={updatedAbstract[field.key]}
+                    onChange={(e) => setUpdatedAbstract({ ...updatedAbstract, [field.key]: e.target.value })}
+                  >
+                    {field.options.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                ) : field.type === "textarea" ? (
+                  <textarea
+                    value={updatedAbstract[field.key]}
+                    onChange={(e) => setUpdatedAbstract({ ...updatedAbstract, [field.key]: e.target.value })}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={updatedAbstract[field.key]}
+                    onChange={(e) => setUpdatedAbstract({ ...updatedAbstract, [field.key]: e.target.value })}
+                  />
+                )
+              ) : (
+                <span>{abstract[field.key]}</span>
+              )}
+            </div>
+          ))}
 
           <div className="abstract-row">
             <strong>Status:</strong>
-            <span
-              className={
-                status === "Approved"
-                  ? "status-accepted"
-                  : status === "Rejected"
-                  ? "status-rejected"
-                  : "status-pending"
-              }
-            >
+            <span className={status === "Approved" ? "status-accepted" : status === "Rejected" ? "status-rejected" : "status-pending"}>
               {status}
             </span>
           </div>
@@ -229,11 +242,6 @@ const AbstractSubmissionStatus = () => {
             <button className="finalize-button" onClick={handleFinalize} disabled={finalizing}>
               {finalizing ? "Finalizing..." : "Finalize Submission"}
             </button>
-          )}
-
-          {/* ✅ Show "Pay Now" Button If Approved */}
-          {status === "Approved" && isFinalized && (
-            <button className="pay-button">Pay Now</button>
           )}
         </div>
       ) : (
