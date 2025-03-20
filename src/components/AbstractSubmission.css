@@ -45,7 +45,28 @@
     list-style-type: none; /* Removes the dots */
     padding-left: 0; /* Ensures there is no indentation */
   }
+  .view-status-button {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out, transform 0.2s;
+    margin-right: 10px; /* Add spacing between buttons */
+  }
   
+  .view-status-button:hover {
+    background-color: #45a049; /* Darker green on hover */
+    transform: scale(1.05); /* Slight scaling effect */
+  }
+  
+  .view-status-button:active {
+    background-color: #3e8e41; /* Even darker green when clicked */
+    transform: scale(0.98); /* Slight shrink effect */
+  }
 
 
   

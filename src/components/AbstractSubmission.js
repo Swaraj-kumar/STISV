@@ -46,7 +46,7 @@ const AbstractSubmission = () => {
   };
 
   const handleViewStatus = () => {
-    navigate('/abstract-status'); // Redirect to Abstract Status page
+    navigate('/AbstractSubmissionStatus'); // Redirect to Abstract Status page
   };
 
   return (
