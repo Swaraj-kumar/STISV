@@ -20,7 +20,7 @@ const Contact = () => {
         setIsSubmitting(true);
 
         try {
-            const response = await axios.post("https://stisv.onrender.com/send-query", formData);
+            const response = await axios.post("https://stisv.onrender.com/submit-query", formData);
             setResponseMessage(response.data.message);
             setFormData({ name: "", email: "", message: "" });
         } catch (error) {

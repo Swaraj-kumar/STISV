@@ -421,26 +421,41 @@ try {
   }
 });
 
-app.post("/send-query", async (req, res) => {
-  const { name, email, message } = req.body;
-
-  if (!name || !email || !message) {
-      return res.status(400).json({ message: "All fields are required." });
-  }
-
-  const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: "stis.mte@iisc.ac.in", // Replace with your official conference email
-      subject: `New Query from ${name}`,
-      text: `You have received a new query:\n\nName: ${name}\nEmail: ${email}\nMessage: ${message}`
-  };
-
+app.post("/submit-query", async (req, res) => {
   try {
-      await transporter.sendMail(mailOptions);
-      res.status(200).json({ message: "Your query has been sent successfully!" });
+    const { name, email, message } = req.body;
+
+    if (!name || !email || !message) {
+      return res.status(400).json({ message: "All fields are required!" });
+    }
+
+    // ✅ Send email to Conference Secretariat
+    const adminMailOptions = {
+      from: process.env.EMAIL_USER,
+      to: "stis.mte@iisc.ac.in", // Admin Email
+      subject: `New Query from ${name}`,
+      text: `A new query has been submitted:\n\nName: ${name}\nEmail: ${email}\nMessage: ${message}\n\nPlease respond to the user soon.`,
+    };
+
+    await transporter.sendMail(adminMailOptions);
+    console.log("✅ Query email sent to admin");
+
+    // ✅ Send confirmation email to user
+    const userMailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Query Received - STIS-V 2025",
+      text: `Dear ${name},\n\nThank you for reaching out to us!\n\nWe have received your query and will get back to you shortly.\n\nBest regards,\nSTIS-V 2025 Team`,
+    };
+
+    await transporter.sendMail(userMailOptions);
+    console.log("✅ Confirmation email sent to user:", email);
+
+    res.status(200).json({ message: "Query submitted successfully!" });
+
   } catch (error) {
-      console.error("Error sending email:", error);
-      res.status(500).json({ message: "Failed to send query. Please try again later." });
+    console.error("❌ Error submitting query:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
