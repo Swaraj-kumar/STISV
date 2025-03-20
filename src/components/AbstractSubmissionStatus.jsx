@@ -131,7 +131,7 @@ const AbstractSubmissionStatus = () => {
   };
 
   const handle = () => {
-    window.location.href = "/home";
+    window.location.href = "/";
   };
 
   if (loading) return <p>Loading...</p>;
