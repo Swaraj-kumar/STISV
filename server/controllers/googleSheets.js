@@ -54,7 +54,7 @@ async function updateGoogleSheet(userData, isAbstractSubmission = false) {
 
       if (existingAbstractRow) {
         console.log("🔄 Updating existing abstract submission for:", userData.email);
-
+        existingAbstractRow.Abstract_Code = userData.abstractSubmission?.code || "N/A";
         existingAbstractRow.Abstract_Title = userData.abstractSubmission?.title || "N/A";
         existingAbstractRow.Abstract_Scope = userData.abstractSubmission?.scope || "N/A";
         existingAbstractRow.Abstract_PresentingType = userData.abstractSubmission?.presentingType || "N/A";
@@ -67,6 +67,7 @@ async function updateGoogleSheet(userData, isAbstractSubmission = false) {
       } else {
         console.log("⚠️ No existing abstract found. Adding a new submission...");
         await abstractSheet.addRow({
+          Abstract_Code: userData.abstractSubmission?.code || "N/A",
           Full_Name: userData.fullName,
           Email: userData.email,
           Abstract_Title: userData.abstractSubmission?.title || "N/A",
