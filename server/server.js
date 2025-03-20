@@ -108,6 +108,7 @@ const userSchema = new mongoose.Schema({
   abstractSubmission: {
     title: { type: String },
     scope: { type: String },
+    abstractCode: { type: String },
     presentingType: { type: String },
     firstAuthorName: { type: String },
     firstAuthorAffiliation: { type: String },
