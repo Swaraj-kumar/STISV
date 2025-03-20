@@ -421,25 +421,40 @@ try {
 
 app.put("/update-abstract", verifyToken, async (req, res) => {
   try {
-    const { uid, title, scope, presentingType } = req.body;
+    const { uid, title, scope, presentingType, abstractFile } = req.body;
 
-    const user = await User.findOneAndUpdate(
-      { uid },
-      {
-        $set: {
-          "abstractSubmission.title": title,
-          "abstractSubmission.scope": scope,
-          "abstractSubmission.presentingType": presentingType,
-        }
-      },
-      { new: true }
-    );
+    console.log("🔹 Received update request for UID:", uid);
+    console.log("📄 New Abstract Title:", title);
+    console.log("📜 New Theme/Scope:", scope);
+    console.log("🎤 New Presenting Type:", presentingType);
+    console.log("📎 New Abstract File:", abstractFile);
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!uid) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const user = await User.findOne({ uid });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // ✅ Ensure abstracts are updated properly
+    user.abstractSubmission.title = title;
+    user.abstractSubmission.scope = scope;
+    user.abstractSubmission.presentingType = presentingType;
+    if (abstractFile) user.abstractSubmission.abstractFile = abstractFile;
+
+    await user.save();
+
+    console.log("✅ Abstract updated successfully in MongoDB");
+
+    // ✅ Update Google Sheets after MongoDB update
+    await updateGoogleSheet(user, true);
 
     res.json({ message: "Abstract updated successfully", abstract: user.abstractSubmission });
+
   } catch (error) {
-    console.error("Error updating abstract:", error);
+    console.error("❌ Error updating abstract:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });

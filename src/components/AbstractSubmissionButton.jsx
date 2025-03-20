@@ -1,4 +1,4 @@
-import React, { useState ,  useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AbstractSubmissionButton.css";
 
@@ -23,15 +23,18 @@ const SubmitAbstractForm = () => {
 
   const navigate = useNavigate();
 
+  // ✅ Handle form input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  // ✅ Handle file upload change
   const handleFileChange = (e) => {
     setFormData({ ...formData, abstractFile: e.target.files[0] });
   };
 
+  // ✅ Validate form fields
   const validateForm = () => {
     let newErrors = {};
     if (!formData.title) newErrors.title = "Title is required";
@@ -48,21 +51,22 @@ const SubmitAbstractForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // ✅ Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-  
-    setLoading(true); // start spinner
-  
+
+    setLoading(true); // Start spinner
+
     const token = sessionStorage.getItem("token");
     const uid = sessionStorage.getItem("uid");
-  
+
     if (!token || !uid) {
       setMessage("User is not logged in.");
-      setLoading(false); // stop spinner on failure
+      setLoading(false); // Stop spinner on failure
       return;
     }
-  
+
     const submitFormData = new FormData();
     submitFormData.append("uid", uid);
     submitFormData.append("title", formData.title);
@@ -74,11 +78,11 @@ const SubmitAbstractForm = () => {
     submitFormData.append("presentingAuthorName", formData.presentingAuthorName);
     submitFormData.append("presentingAuthorAffiliation", formData.presentingAuthorAffiliation);
     submitFormData.append("mainBody", formData.mainBody);
-  
+
     if (formData.abstractFile) {
       submitFormData.append("abstractFile", formData.abstractFile);
     }
-  
+
     try {
       const response = await fetch("https://stisv.onrender.com/submit-abstract", {
         method: "POST",
@@ -87,11 +91,30 @@ const SubmitAbstractForm = () => {
         },
         body: submitFormData,
       });
-  
+
       const data = await response.json();
       if (response.ok) {
         setMessage("Abstract submitted successfully!");
         setShowSuccessPopup(true);
+
+        // ✅ Clear the form and remove file input after successful submission
+        setFormData({
+          title: "",
+          theme: "",
+          presentingType: "",
+          firstAuthorName: "",
+          firstAuthorAffiliation: "",
+          otherAuthors: "",
+          presentingAuthorName: "",
+          presentingAuthorAffiliation: "",
+          abstractFile: null,
+          mainBody: "",
+        });
+
+        // ✅ Redirect to Status Page after 3 seconds
+        setTimeout(() => {
+          navigate("/AbstractSubmissionStatus");
+        }, 3000);
       } else {
         setMessage(`Error: ${data.message}`);
       }
@@ -99,39 +122,29 @@ const SubmitAbstractForm = () => {
       console.error("Error submitting abstract:", error);
       setMessage("Submission failed. Please try again.");
     }
-  
-    setLoading(false); // ✅ move here — only run after fetch is complete
+
+    setLoading(false); // ✅ Move here — only run after fetch is complete
   };
-  
- // ✅ Redirect to Abstract Submission Status Page after successful submission
- useEffect(() => {
-  if (showSuccessPopup) {
-    setTimeout(() => {
-      navigate("/AbstractSubmissionStatus");
-    }, 3000); // Redirect after 3 seconds
-  }
-}, [showSuccessPopup, navigate]);
 
-return (
-  <div className="submit-abstract-container">
-    {/* ✅ Success Popup - Auto Redirects after 3 seconds */}
-    {showSuccessPopup && (
-      <div className="success-popup-overlay">
-        <div className="success-popup">
-          <h2>Success!</h2>
-          <p>Abstract submission successful. Redirecting you...</p>
+  return (
+    <div className="submit-abstract-container">
+      {/* ✅ Success Popup - Auto Redirects after 3 seconds */}
+      {showSuccessPopup && (
+        <div className="success-popup-overlay">
+          <div className="success-popup">
+            <h2>Success!</h2>
+            <p>Abstract submission successful. Redirecting you...</p>
+          </div>
         </div>
-      </div>
-    )}
+      )}
 
-    {/* ✅ Loading Overlay */}
-    {loading && (
-      <div className="overlay">
-        <div className="loader">Loading...</div>
-        <p style={{ color: "#fff", marginTop: "1rem" }}>Submitting your abstract...</p>
-      </div>
-    )}
-
+      {/* ✅ Loading Overlay */}
+      {loading && (
+        <div className="overlay">
+          <div className="loader">Loading...</div>
+          <p style={{ color: "#fff", marginTop: "1rem" }}>Submitting your abstract...</p>
+        </div>
+      )}
 
       <h1>Abstract Submission Form</h1>
       <form onSubmit={handleSubmit} className={loading ? "blur" : ""}>
@@ -161,19 +174,6 @@ return (
         <input type="text" name="firstAuthorAffiliation" value={formData.firstAuthorAffiliation} onChange={handleChange} required />
         {errors.firstAuthorAffiliation && <span className="error">{errors.firstAuthorAffiliation}</span>}
 
-        <h3>Other Author(s), if any</h3>
-        <label>Names & Affiliations (if multiple, separate by comma)</label>
-        <textarea name="otherAuthors" value={formData.otherAuthors} onChange={handleChange} />
-
-        <h3>Presenting Author *</h3>
-        <label>Name</label>
-        <input type="text" name="presentingAuthorName" value={formData.presentingAuthorName} onChange={handleChange} required />
-        {errors.presentingAuthorName && <span className="error">{errors.presentingAuthorName}</span>}
-
-        <label>Affiliation</label>
-        <input type="text" name="presentingAuthorAffiliation" value={formData.presentingAuthorAffiliation} onChange={handleChange} required />
-        {errors.presentingAuthorAffiliation && <span className="error">{errors.presentingAuthorAffiliation}</span>}
-
         <label>Abstract File Submission *</label>
         <input type="file" name="abstractFile" onChange={handleFileChange} accept=".pdf,.doc,.docx" required />
         {errors.abstractFile && <span className="error">{errors.abstractFile}</span>}
@@ -183,19 +183,13 @@ return (
         {errors.mainBody && <span className="error">{errors.mainBody}</span>}
 
         <div className="form-buttons">
-        <button type="submit" disabled={loading}>Submit</button>
-
+          <button type="submit" disabled={loading}>Submit</button>
         </div>
       </form>
-      
-      {/* Message at the bottom (keep for error messages) */}
+
       {message && !showSuccessPopup && <p className="message">{message}</p>}
     </div>
   );
 };
 
 export default SubmitAbstractForm;
-
-
-
-
