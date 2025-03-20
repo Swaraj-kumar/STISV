@@ -288,6 +288,12 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
     console.log("🧾 Request Body:", req.body);
     console.log("📎 File received:", req.file.originalname);
 
+    const generateAbstractCode = () => {
+      return `STIS_${Math.floor(1000 + Math.random() * 9000)}`;
+    };
+
+    const abstractCode = generateAbstractCode();
+
     // Upload to Cloudinary
     const uploadToCloudinary = () => {
       return new Promise((resolve, reject) => {
@@ -319,6 +325,10 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
           "abstractSubmission.presentingAuthorAffiliation": presentingAuthorAffiliation,
           "abstractSubmission.abstractFile": cloudinaryResult.secure_url,
           "abstractSubmission.mainBody": mainBody,
+          "abstractSubmission.abstractCode": abstractCode, // ✅ Save Abstract Code
+          "abstractSubmission.isFinalized": false,
+          "abstractSubmission.status": "Pending",
+          "abstractSubmission.timestamp": new Date().toLocaleString(),
         }
       },
       { new: true, upsert: true }
@@ -341,7 +351,7 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
       subject: "Abstract Submission Received Confirmation - STIS-V 2025 Conference",
       text: `Dear ${user.givenName || user.fullName || "Author"},
 
-We are pleased to confirm that we have received your submission successfully.
+We are pleased to confirm that we have received your submission successfully.This is the abstract code for your submission: ${abstractCode}.This code will be used for all future corresponence regarding your submission.
 Please note that all submissions will be carefully reviewed, and you can expect to hear from us by 31st May 2025.
 We truly appreciate your contribution and look forward to your active participation in the Conference.
 
@@ -364,7 +374,7 @@ const adminAbstractMail = {
   to: "stis.mte@iisc.ac.in",
   subject: `New Abstract Submission from ${user.fullName}`,
   text: `A new abstract has been submitted.
-
+Abstract Code: ${abstractCode}
 Full Name: ${user.fullName}
 Email: ${user.email}
 Phone: ${user.phone}
