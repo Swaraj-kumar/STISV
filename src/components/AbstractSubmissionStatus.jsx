@@ -12,9 +12,9 @@ const AbstractSubmissionStatus = () => {
   const [finalizing, setFinalizing] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [updatedAbstract, setUpdatedAbstract] = useState({});
-  const [newFile, setNewFile] = useState(null); // ✅ Handle file uploads
+  const [newFile, setNewFile] = useState(null);
+  const [showFinalizePopup, setShowFinalizePopup] = useState(false);
 
-  // Retrieve token and UID from sessionStorage
   const token = sessionStorage.getItem("token");
   const uid = sessionStorage.getItem("uid");
 
@@ -48,17 +48,14 @@ const AbstractSubmissionStatus = () => {
     }
   }, [uid, token]);
 
-  // Handle Abstract Updates
   const handleUpdate = async () => {
     setUpdating(true);
 
     try {
       const formData = new FormData();
-      formData.append("uid", uid); // ✅ Send UID
-
+      formData.append("uid", uid);
       let hasUpdates = false;
 
-      // ✅ Append only changed fields
       [
         "title",
         "theme",
@@ -76,7 +73,6 @@ const AbstractSubmissionStatus = () => {
         }
       });
 
-      // ✅ Handle File Upload
       if (newFile) {
         formData.append("abstractFile", newFile);
         hasUpdates = true;
@@ -96,7 +92,7 @@ const AbstractSubmissionStatus = () => {
 
       setAbstract(updatedAbstract);
       setEditMode(false);
-      setNewFile(null); // ✅ Clear file input after upload
+      setNewFile(null);
       setError(null);
     } catch (error) {
       setError("Error updating abstract.");
@@ -105,15 +101,13 @@ const AbstractSubmissionStatus = () => {
     }
   };
 
-  // Handle File Upload
   const handleFileChange = (e) => {
     if (!isFinalized) {
       setNewFile(e.target.files[0]);
     }
   };
 
-  // Handle Finalization (Disable Editing)
-  const handleFinalize = async () => {
+  const confirmFinalize = async () => {
     setFinalizing(true);
     try {
       await axios.post(
@@ -123,11 +117,16 @@ const AbstractSubmissionStatus = () => {
       );
       setIsFinalized(true);
       setEditMode(false);
+      setShowFinalizePopup(false);
     } catch (error) {
       setError("Error finalizing submission.");
     } finally {
       setFinalizing(false);
     }
+  };
+
+  const handlePayment = () => {
+    window.location.href = "https://www.onlinesbi.sbi/sbicollect/"; // Redirects to SBI ePay
   };
 
   if (loading) return <p>Loading...</p>;
@@ -137,16 +136,25 @@ const AbstractSubmissionStatus = () => {
     <div className="abstract-status-container">
       <h2>Abstract Submission Status</h2>
 
-      {/* ✅ Abstract Code Display */}
-      {abstract && (
-        <div className="abstract-row">
-          <strong>Abstract Code:</strong> <span className="abstract-code">{abstract.abstractCode}</span>
+      {showFinalizePopup && (
+        <div className="popup-overlay">
+          <div className="popup">
+            <h3>Are you sure you want to finalize?</h3>
+            <p>Once finalized, you will not be able to edit your abstract.</p>
+            <div className="popup-buttons">
+              <button className="confirm-button" onClick={confirmFinalize} disabled={finalizing}>
+                {finalizing ? "Finalizing..." : "Yes, Finalize"}
+              </button>
+              <button className="cancel-button" onClick={() => setShowFinalizePopup(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {abstract ? (
+      {abstract && (
         <div className="abstract-details">
-          {/* ✅ Abstract Details */}
           {[
             { label: "Title", key: "title" },
             { label: "Theme", key: "theme" },
@@ -197,27 +205,6 @@ const AbstractSubmissionStatus = () => {
             </span>
           </div>
 
-          {/* ✅ File Upload or Download */}
-          <div className="abstract-row">
-            <strong>Abstract File:</strong>
-            {abstract.abstractFile ? (
-              <a href={abstract.abstractFile} target="_blank" rel="noopener noreferrer" className="download-link">
-                Download
-              </a>
-            ) : (
-              <span>No file uploaded</span>
-            )}
-          </div>
-
-          {/* ✅ Allow File Upload if Not Finalized */}
-          {!isFinalized && (
-            <div className="abstract-row">
-              <strong>Upload New File:</strong>
-              <input type="file" onChange={handleFileChange} accept=".pdf,.doc,.docx" />
-            </div>
-          )}
-
-          {/* ✅ Edit & Update Buttons */}
           {!isFinalized && (
             <div className="abstract-actions">
               {editMode ? (
@@ -237,15 +224,18 @@ const AbstractSubmissionStatus = () => {
             </div>
           )}
 
-          {/* ✅ Finalize Submission Button */}
           {!isFinalized && (
-            <button className="finalize-button" onClick={handleFinalize} disabled={finalizing}>
-              {finalizing ? "Finalizing..." : "Finalize Submission"}
+            <button className="finalize-button" onClick={() => setShowFinalizePopup(true)}>
+              Finalize Submission
+            </button>
+          )}
+
+          {status === "Approved" && isFinalized && (
+            <button className="pay-button" onClick={handlePayment}>
+              Pay Now
             </button>
           )}
         </div>
-      ) : (
-        <p>No abstract submitted yet.</p>
       )}
     </div>
   );
