@@ -210,6 +210,12 @@ button {
   color: white;
 }
 
+.pending-message {
+  color: #ff9800;
+  font-weight: bold;
+  text-align: center;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .abstract-status-container {
