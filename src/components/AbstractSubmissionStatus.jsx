@@ -54,6 +54,7 @@ const AbstractSubmissionStatus = () => {
     try {
       const formData = new FormData();
       formData.append("uid", uid);
+
       let hasUpdates = false;
 
       [
@@ -126,7 +127,7 @@ const AbstractSubmissionStatus = () => {
   };
 
   const handlePayment = () => {
-    window.location.href = "https://www.onlinesbi.sbi/sbicollect/"; // Redirects to SBI ePay
+    window.location.href = "https://www.onlinesbi.sbi/sbicollect/";
   };
 
   if (loading) return <p>Loading...</p>;
@@ -157,7 +158,7 @@ const AbstractSubmissionStatus = () => {
         <div className="abstract-details">
           {[
             { label: "Title", key: "title" },
-            { label: "Theme", key: "theme" },
+            { label: "Theme", key: "scope" },
             { label: "Mode of Presentation", key: "presentingType", type: "select", options: ["Oral", "Poster"] },
             { label: "First Author Name", key: "firstAuthorName" },
             { label: "First Author Affiliation", key: "firstAuthorAffiliation" },
