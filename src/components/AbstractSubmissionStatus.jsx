@@ -12,6 +12,7 @@ const AbstractSubmissionStatus = () => {
   const [finalizing, setFinalizing] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [updatedAbstract, setUpdatedAbstract] = useState({});
+  const [newFile, setNewFile] = useState(null); // ✅ Handle file uploads
   
   // Retrieve token and UID from sessionStorage
   const token = sessionStorage.getItem("token");
@@ -22,9 +23,7 @@ const AbstractSubmissionStatus = () => {
       try {
         const response = await axios.get(
           `https://stisv.onrender.com/get-abstract/${uid}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         setAbstract(response.data.abstract);
@@ -53,17 +52,34 @@ const AbstractSubmissionStatus = () => {
   const handleUpdate = async () => {
     setUpdating(true);
     try {
-      await axios.put(
-        `https://stisv.onrender.com/update-abstract`,
-        { uid, ...updatedAbstract },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const formData = new FormData();
+      formData.append("uid", uid);
+      formData.append("title", updatedAbstract.title);
+      formData.append("scope", updatedAbstract.scope);
+      formData.append("presentingType", updatedAbstract.presentingType);
+
+      if (newFile) {
+        formData.append("abstractFile", newFile);
+      }
+
+      await axios.put(`https://stisv.onrender.com/update-abstract`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       setAbstract(updatedAbstract);
       setEditMode(false);
+      setNewFile(null);
     } catch (error) {
       setError("Error updating abstract.");
     } finally {
       setUpdating(false);
+    }
+  };
+
+  // Handle File Upload
+  const handleFileChange = (e) => {
+    if (!isFinalized) {
+      setNewFile(e.target.files[0]);
     }
   };
 
@@ -91,7 +107,7 @@ const AbstractSubmissionStatus = () => {
   return (
     <div className="abstract-status-container">
       <h2>Abstract Submission Status</h2>
-      
+
       {/* ✅ Abstract Code Display */}
       {abstract && (
         <div className="abstract-row">
@@ -158,18 +174,23 @@ const AbstractSubmissionStatus = () => {
             </span>
           </div>
 
-          {/* ✅ Download Abstract File (if available) */}
-          {abstract.abstractFile && (
-            <div className="abstract-row">
-              <strong>Abstract File:</strong>
-              <a
-                href={abstract.abstractFile}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="download-link"
-              >
+          {/* ✅ File Upload or Download */}
+          <div className="abstract-row">
+            <strong>Abstract File:</strong>
+            {abstract.abstractFile ? (
+              <a href={abstract.abstractFile} target="_blank" rel="noopener noreferrer" className="download-link">
                 Download
               </a>
+            ) : (
+              <span>No file uploaded</span>
+            )}
+          </div>
+
+          {/* ✅ Allow File Upload if Not Finalized */}
+          {!isFinalized && (
+            <div className="abstract-row">
+              <strong>Upload New File:</strong>
+              <input type="file" onChange={handleFileChange} accept=".pdf,.doc,.docx" />
             </div>
           )}
 

@@ -1,70 +1,178 @@
 /* AbstractSubmissionStatus.css */
 
 .abstract-status-container {
-    max-width: 800px;
-    margin: 80px auto 20px; /* Added margin to prevent overlap with navbar */
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 100px auto 30px; /* Adjusted margin to avoid navbar overlap */
+  padding: 25px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+/* Title Styling */
+h2 {
+  text-align: center;
+  color: #222;
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* Error Message */
+.error-message {
+  color: red;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Abstract Details Section */
+.abstract-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+/* Individual Row Styling */
+.abstract-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  background: #f9f9f9;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.abstract-row strong {
+  color: #333;
+  font-weight: bold;
+}
+
+.abstract-row span {
+  color: #222;
+  font-weight: normal;
+}
+
+/* Status Indicators */
+.status-accepted {
+  color: #28a745; /* Green */
+  font-weight: bold;
+}
+
+.status-rejected {
+  color: #dc3545; /* Red */
+  font-weight: bold;
+}
+
+.status-pending {
+  color: #ff9800; /* Orange */
+  font-weight: bold;
+}
+
+/* File Download Link */
+.download-link {
+  color: #007bff;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.download-link:hover {
+  text-decoration: underline;
+}
+
+/* Buttons */
+.abstract-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+button {
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.edit-button {
+  background: #007bff;
+  color: #fff;
+}
+
+.edit-button:hover {
+  background: #0056b3;
+}
+
+.save-button {
+  background: #28a745;
+  color: #fff;
+}
+
+.save-button:hover {
+  background: #1e7e34;
+}
+
+.cancel-button {
+  background: #6c757d;
+  color: #fff;
+}
+
+.cancel-button:hover {
+  background: #545b62;
+}
+
+.finalize-button {
+  background: #dc3545;
+  color: #fff;
+}
+
+.finalize-button:hover {
+  background: #c82333;
+}
+
+.pay-button {
+  background: #ff9800;
+  color: #fff;
+}
+
+.pay-button:hover {
+  background: #e68900;
+}
+
+/* File Upload Section */
+.file-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.file-upload input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .abstract-status-container {
+      max-width: 90%;
+      padding: 20px;
   }
-  
-  h2 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 20px;
-    font-size: 24px;
-  }
-  
-  .error-message {
-    color: red;
-    text-align: center;
-    font-weight: bold;
-  }
-  
-  .abstract-details {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  
+
   .abstract-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    background: #f8f8f8;
-    border-radius: 5px;
+      flex-direction: column;
+      gap: 5px;
   }
-  
-  .abstract-row strong {
-    color: #444;
-  }
-  
-  .abstract-row span {
-    color: #222;
-  }
-  
-  .status-accepted {
-    color: green;
-    font-weight: bold;
-  }
-  
-  .status-rejected {
-    color: red;
-    font-weight: bold;
-  }
-  
-  a {
-    text-decoration: none;
-    color: #007bff;
-    font-weight: bold;
-  }
-  
-  a:hover {
-    text-decoration: underline;
-  }
-  
 
-
+  .abstract-actions {
+      flex-direction: column;
+  }
+}
