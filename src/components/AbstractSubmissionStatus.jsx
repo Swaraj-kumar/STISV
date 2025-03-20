@@ -59,7 +59,7 @@ const AbstractSubmissionStatus = () => {
 
       [
         "title",
-        "theme",
+        "scope",
         "presentingType",
         "firstAuthorName",
         "firstAuthorAffiliation",
@@ -156,7 +156,7 @@ const AbstractSubmissionStatus = () => {
 
       {abstract && (
         <div className="abstract-details">
-          {[
+          {[ 
             { label: "Title", key: "title" },
             { label: "Theme", key: "scope" },
             { label: "Mode of Presentation", key: "presentingType", type: "select", options: ["Oral", "Poster"] },
@@ -198,6 +198,24 @@ const AbstractSubmissionStatus = () => {
               )}
             </div>
           ))}
+
+          <div className="abstract-row">
+            <strong>Abstract File:</strong>
+            {abstract.abstractFile ? (
+              <a href={abstract.abstractFile} target="_blank" rel="noopener noreferrer" className="download-link">
+                Download
+              </a>
+            ) : (
+              <span>No file uploaded</span>
+            )}
+          </div>
+
+          {!isFinalized && (
+            <div className="abstract-row">
+              <strong>Upload New File:</strong>
+              <input type="file" onChange={handleFileChange} accept=".pdf,.doc,.docx" />
+            </div>
+          )}
 
           <div className="abstract-row">
             <strong>Status:</strong>
