@@ -484,6 +484,41 @@ app.put("/update-abstract", verifyToken, upload.single("abstractFile"), async (r
   }
 });
 
+app.post("/finalize-abstract", verifyToken, async (req, res) => {
+  try {
+    const { uid } = req.body;
+
+    if (!uid) {
+      return res.status(400).json({ message: "User ID is required." });
+    }
+
+    console.log(`✅ Finalizing abstract for UID: ${uid}`);
+
+    // ✅ Update the abstract in MongoDB to set `isFinalized = true`
+    const user = await User.findOneAndUpdate(
+      { uid },
+      { $set: { "abstractSubmission.isFinalized": true } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    console.log("✅ Abstract successfully finalized in MongoDB!");
+
+    // ✅ Update Google Sheets (if required)
+    console.log("🔄 Updating Google Sheets...");
+    await updateGoogleSheet(user, true);
+    console.log("✅ Google Sheets updated successfully!");
+
+    res.status(200).json({ message: "Abstract finalized successfully", abstract: user.abstractSubmission });
+
+  } catch (error) {
+    console.error("❌ Error finalizing abstract:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 
 app.delete("/delete-abstract-file", verifyToken, async (req, res) => {
