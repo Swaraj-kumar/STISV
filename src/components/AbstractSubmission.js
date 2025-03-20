@@ -21,8 +21,10 @@ const AbstractSubmission = () => {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(response => {
-        if (response.data.abstract) {
-          setHasSubmittedAbstract(true); // ✅ Abstract exists
+        if (response.data.abstract && response.data.abstract.abstractCode) {
+          setHasSubmittedAbstract(true); // ✅ Abstract exists (has `abstractCode`)
+        } else {
+          setHasSubmittedAbstract(false);
         }
       })
       .catch(error => {
