@@ -86,6 +86,24 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+const verifyAdminToken = (req, res, next) => {
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+  if (!token) {
+    return res.status(401).json({ message: "No token, authorization denied" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden: Not an Admin" });
+    }
+    req.admin = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: "Invalid token" });
+  }
+};
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -459,6 +477,17 @@ app.post("/submit-query", async (req, res) => {
   }
 });
 
+app.get("/get-all-abstracts", async (req, res) => {
+  try {
+    const abstracts = await User.find({}, "uid fullName email abstractSubmission");
+    res.json({ abstracts });
+  } catch (error) {
+    console.error("Error fetching abstracts:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 
 app.put("/update-abstract", verifyToken, upload.single("abstractFile"), async (req, res) => {
   try {
@@ -552,7 +581,7 @@ app.post("/admin/login", async (req, res) => {
   }
 });
 
-app.put("/admin/update-abstract-status", async (req, res) => {
+app.put("/admin/update-abstract-status", verifyAdminToken, async (req, res) => {
   try {
     const { uid, status } = req.body;
 
@@ -591,6 +620,7 @@ app.put("/admin/update-abstract-status", async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
+
 
 
 app.post("/finalize-abstract", verifyToken, async (req, res) => {
