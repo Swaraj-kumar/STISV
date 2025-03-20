@@ -1,8 +1,35 @@
-// src/components/Contact.js
-import React from 'react';
-import './Contact.css';
+import React, { useState } from "react";
+import axios from "axios";
+import "./Contact.css";
 
 const Contact = () => {
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        message: ""
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [responseMessage, setResponseMessage] = useState("");
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+            const response = await axios.post("https://stisv.onrender.com/send-query", formData);
+            setResponseMessage(response.data.message);
+            setFormData({ name: "", email: "", message: "" });
+        } catch (error) {
+            setResponseMessage("Failed to send message. Please try again later.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="contact-container">
             <div className="contact-info">
@@ -26,6 +53,43 @@ const Contact = () => {
                     <a href="https://materials.iisc.ac.in/stis2025/" target="_blank" rel="noopener noreferrer">https://materials.iisc.ac.in/stis2025/</a><br />
                     <strong>Tel.:</strong> <br /> +91 80 22933240
                 </p>
+            </div>
+
+            {/* Contact Form */}
+            <div className="contact-form">
+                <h2>Submit Your Query</h2>
+                <form onSubmit={handleSubmit}>
+                    <label>Name</label>
+                    <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                    />
+
+                    <label>Email</label>
+                    <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                    />
+
+                    <label>Message</label>
+                    <textarea
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        required
+                    ></textarea>
+
+                    <button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? "Sending..." : "Submit"}
+                    </button>
+                </form>
+                {responseMessage && <p className="response-message">{responseMessage}</p>}
             </div>
         </div>
     );

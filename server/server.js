@@ -421,6 +421,30 @@ try {
   }
 });
 
+app.post("/send-query", async (req, res) => {
+  const { name, email, message } = req.body;
+
+  if (!name || !email || !message) {
+      return res.status(400).json({ message: "All fields are required." });
+  }
+
+  const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: "stis.mte@iisc.ac.in", // Replace with your official conference email
+      subject: `New Query from ${name}`,
+      text: `You have received a new query:\n\nName: ${name}\nEmail: ${email}\nMessage: ${message}`
+  };
+
+  try {
+      await transporter.sendMail(mailOptions);
+      res.status(200).json({ message: "Your query has been sent successfully!" });
+  } catch (error) {
+      console.error("Error sending email:", error);
+      res.status(500).json({ message: "Failed to send query. Please try again later." });
+  }
+});
+
+
 app.put("/update-abstract", verifyToken, upload.single("abstractFile"), async (req, res) => {
   try {
     const uid = req.body.uid;
