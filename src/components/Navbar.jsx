@@ -164,7 +164,7 @@ function Navbar() {
             <NavLink to="/abstractsubmission" onClick={() => handleDropdownClick("/abstract-submission")}>
               Submit Abstract
             </NavLink>
-            <NavLink to="/AbstractSubmissionStatus" onClick={() => handleDropdownClick("/abstract-submission")}>
+            <NavLink to="/AbstractSubmissionStatus" onClick={() => handleDropdownClick("/AbstractSubmissionStatus")}>
               Abstract Submission Status
             </NavLink>
 
