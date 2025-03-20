@@ -349,7 +349,7 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
-      subject: "${user.abstractCode} Abstract Submission Received Confirmation - STIS-V 2025 Conference",
+      subject: ' ${user.abstractCode} - Abstract Submission Received Confirmation - STIS-V 2025 Conference',
       text: `Dear ${user.givenName || user.fullName || "Author"},
 
 We are pleased to confirm that we have received your submission successfully.This is the abstract code for your submission: ${abstractCode}.
