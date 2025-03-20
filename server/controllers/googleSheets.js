@@ -67,7 +67,7 @@ async function updateGoogleSheet(userData, isAbstractSubmission = false) {
       } else {
         console.log("⚠️ No existing abstract found. Adding a new submission...");
         await abstractSheet.addRow({
-          Abstract_Code: userData.abstractSubmission?.code || "N/A",
+          Abstract_Code: userData.abstractSubmission?.abstractCode || "N/A",
           Full_Name: userData.fullName,
           Email: userData.email,
           Abstract_Title: userData.abstractSubmission?.title || "N/A",
