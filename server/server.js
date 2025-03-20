@@ -349,12 +349,13 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
-      subject: "Abstract Submission Received Confirmation - STIS-V 2025 Conference",
+      subject: "${user.abstractCode} Abstract Submission Received Confirmation - STIS-V 2025 Conference",
       text: `Dear ${user.givenName || user.fullName || "Author"},
 
-We are pleased to confirm that we have received your submission successfully.This is the abstract code for your submission: ${abstractCode}.This code will be used for all future corresponence regarding your submission.
-Please note that all submissions will be carefully reviewed, and you can expect to hear from us by 31st May 2025.
-We truly appreciate your contribution and look forward to your active participation in the Conference.
+We are pleased to confirm that we have received your submission successfully.This is the abstract code for your submission: ${abstractCode}.
+This code will be used for all future corresponence regarding your submission.Please note that all submissions will be carefully reviewed, 
+and you can expect to hear from us by 31st May 2025.We truly appreciate your contribution and look forward to your active participation in 
+the Conference.
 
 Thanking you and with best regards,
 
