@@ -22,6 +22,18 @@ async function updateGoogleSheet(userData, isAbstractSubmission = false) {
     // ✅ Selecting sheets
     const registrationSheet = doc.sheetsByTitle["Registration Details"];
     const abstractSheet = doc.sheetsByTitle["Abstract Submissions"];
+    const timestamp = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      weekday: "short",
+    });
+    
+    
 
     if (!registrationSheet || !abstractSheet) {
       console.error("❌ One or both sheets do not exist. Please create them in Google Sheets.");
@@ -48,6 +60,7 @@ async function updateGoogleSheet(userData, isAbstractSubmission = false) {
         existingAbstractRow.Abstract_PresentingType = userData.abstractSubmission?.presentingType || "N/A";
         existingAbstractRow.Abstract_File = userData.abstractSubmission?.abstractFile || "N/A";
         existingAbstractRow.Abstract_Authors = userData.abstractSubmission?.otherAuthors || "N/A";
+        existingAbstractRow.Timestamp = timestamp;
 
         await existingAbstractRow.save();
         console.log("✅ Abstract submission updated for:", userData.email);
@@ -62,6 +75,7 @@ async function updateGoogleSheet(userData, isAbstractSubmission = false) {
           Abstract_PresentingType: userData.abstractSubmission?.presentingType || "N/A",
           Abstract_File: userData.abstractSubmission?.abstractFile || "N/A",
           Abstract_Authors: userData.abstractSubmission?.otherAuthors || "N/A",
+          Timestamp: timestamp,
         });
         console.log("✅ New abstract submission added for:", userData.email);
       }
@@ -76,7 +90,7 @@ async function updateGoogleSheet(userData, isAbstractSubmission = false) {
         Full_Name: userData.fullName,
         Country: userData.country,
         Affiliation: userData.affiliation,
-        Registered_At: new Date().toISOString(),
+        Registered_At: timestamp,
       });
       console.log("✅ Registration details added for:", userData.email);
     }
