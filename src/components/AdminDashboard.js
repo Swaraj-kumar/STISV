@@ -12,9 +12,18 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchAbstracts = async () => {
       try {
-        const response = await axios.get("https://stisv.onrender.com/get-all-abstracts");
-        setAbstracts(response.data.abstracts);
+        const response = await axios.get("https://stisv.onrender.com/get-all-abstracts", {
+          headers: { Authorization: `Bearer ${sessionStorage.getItem("adminToken")}` }
+        });
+
+        console.log("API Response:", response.data); // ✅ Debugging
+
+        setAbstracts(response.data.abstracts.map(abstract => ({
+          uid: abstract.uid,
+          ...abstract.abstractSubmission
+        })));
       } catch (error) {
+        console.error("Error fetching abstracts:", error);
         setError("Error fetching abstracts");
       } finally {
         setLoading(false);
@@ -25,8 +34,13 @@ const AdminDashboard = () => {
 
   const updateStatus = async (uid, status) => {
     try {
-      await axios.put("https://stisv.onrender.com/admin/update-abstract-status", { uid, status });
-      setAbstracts((prev) => prev.map((abstract) => (abstract.uid === uid ? { ...abstract, status } : abstract)));
+      await axios.put("https://stisv.onrender.com/admin/update-abstract-status", { uid, status }, {
+        headers: { Authorization: `Bearer ${sessionStorage.getItem("adminToken")}` }
+      });
+
+      setAbstracts(prev => prev.map(abstract =>
+        abstract.uid === uid ? { ...abstract, status } : abstract
+      ));
     } catch (error) {
       setError("Error updating abstract status");
     }
@@ -44,33 +58,38 @@ const AdminDashboard = () => {
     <div className="admin-dashboard-container">
       <h2>Admin Dashboard</h2>
       <button className="logout-button" onClick={handleLogout}>Logout</button>
-      <table>
-        <thead>
-          <tr>
-            <th>Abstract Code</th>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {abstracts.map((abstract) => (
-            <tr key={abstract.uid}>
-              <td>{abstract.abstractCode}</td>
-              <td>{abstract.title}</td>
-              <td>{abstract.firstAuthorName}</td>
-              <td className={abstract.status === "Approved" ? "status-approved" : abstract.status === "Rejected" ? "status-rejected" : "status-pending"}>
-                {abstract.status}
-              </td>
-              <td>
-                <button className="approve-button" onClick={() => updateStatus(abstract.uid, "Approved")}>Approve</button>
-                <button className="reject-button" onClick={() => updateStatus(abstract.uid, "Rejected")}>Reject</button>
-              </td>
+
+      {abstracts.length === 0 ? (
+        <p>No abstracts found.</p>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>Abstract Code</th>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {abstracts.map((abstract) => (
+              <tr key={abstract.uid}>
+                <td>{abstract.abstractCode}</td>
+                <td>{abstract.title}</td>
+                <td>{abstract.firstAuthorName}</td>
+                <td className={abstract.status === "Approved" ? "status-approved" : abstract.status === "Rejected" ? "status-rejected" : "status-pending"}>
+                  {abstract.status}
+                </td>
+                <td>
+                  <button className="approve-button" onClick={() => updateStatus(abstract.uid, "Approved")}>Approve</button>
+                  <button className="reject-button" onClick={() => updateStatus(abstract.uid, "Rejected")}>Reject</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };
