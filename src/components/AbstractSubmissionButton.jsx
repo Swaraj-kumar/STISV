@@ -174,6 +174,20 @@ const SubmitAbstractForm = () => {
         <input type="text" name="firstAuthorAffiliation" value={formData.firstAuthorAffiliation} onChange={handleChange} required />
         {errors.firstAuthorAffiliation && <span className="error">{errors.firstAuthorAffiliation}</span>}
 
+        <h3>Other Author(s), if any</h3>
+        <label>Names & Affiliations (if multiple, separate by comma)</label>
+        <textarea name="otherAuthors" value={formData.otherAuthors} onChange={handleChange} />
+
+        <h3>Presenting Author *</h3>
+        <label>Name</label>
+        <input type="text" name="presentingAuthorName" value={formData.presentingAuthorName} onChange={handleChange} required />
+        {errors.presentingAuthorName && <span className="error">{errors.presentingAuthorName}</span>}
+
+        <label>Affiliation</label>
+        <input type="text" name="presentingAuthorAffiliation" value={formData.presentingAuthorAffiliation} onChange={handleChange} required />
+        {errors.presentingAuthorAffiliation && <span className="error">{errors.presentingAuthorAffiliation}</span>}
+
+
         <label>Abstract File Submission *</label>
         <input type="file" name="abstractFile" onChange={handleFileChange} accept=".pdf,.doc,.docx" required />
         {errors.abstractFile && <span className="error">{errors.abstractFile}</span>}
