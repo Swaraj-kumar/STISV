@@ -44,7 +44,9 @@ import SubmitAbstractForm from './components/AbstractSubmissionButton';
 import ForgotPassword from "./components/ForgotPassword";
 import AbstractSubmissionStatus from './components/AbstractSubmissionStatus';
 import ChairmanMessage from "./components/ChairmanMessage"; // update the path if different
-
+//Admin Login
+import AdminLogin from "./components/AdminLogin";
+import AdminDashboard from "./components/AdminDashboard";
 
 // Router configuration with future flags to remove warnings
 const router = createHashRouter(
@@ -88,7 +90,9 @@ const router = createHashRouter(
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/AbstractSubmissionStatus" element={<AbstractSubmissionStatus />} />
       <Route path="/message-to-chairman" element={<ChairmanMessage />} />
-
+      {/* Admin */}
+      <Route path="/admin-login" element={<AdminLogin />} />
+      <Route path="/admin-dashboard" element={<AdminDashboard/>} />
       
     </Route>
   ),

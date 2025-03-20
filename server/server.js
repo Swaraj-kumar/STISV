@@ -525,6 +525,74 @@ app.put("/update-abstract", verifyToken, upload.single("abstractFile"), async (r
   }
 });
 
+// Admin Schema
+const adminSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+});
+
+const Admin = mongoose.model("Admin", adminSchema);
+
+// Admin Login Endpoint
+app.post("/admin/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const admin = await Admin.findOne({ email });
+
+    if (!admin) return res.status(400).json({ message: "Admin not found" });
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+
+    const token = jwt.sign({ id: admin._id, role: "admin" }, process.env.JWT_SECRET, { expiresIn: "8h" });
+
+    res.json({ message: "Login successful", token });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.put("/admin/update-abstract-status", async (req, res) => {
+  try {
+    const { uid, status } = req.body;
+
+    if (!uid || !status) {
+      return res.status(400).json({ message: "UID and status are required." });
+    }
+
+    if (!["Approved", "Rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value." });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { uid },
+      { $set: { "abstractSubmission.status": status } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Send Email Notification to User
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: `Abstract Submission Status - STIS-V 2025`,
+      text: `Dear ${user.fullName},\n\nYour abstract submission has been **${status}**.\n\nThank you for your participation!\n\nBest Regards,\nSTIS-V 2025 Team`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Email sent to ${user.email} for status update: ${status}`);
+
+    res.json({ message: `Abstract ${status} successfully`, user });
+  } catch (error) {
+    console.error("Error updating abstract status:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+
 app.post("/finalize-abstract", verifyToken, async (req, res) => {
   try {
     const { uid } = req.body;
