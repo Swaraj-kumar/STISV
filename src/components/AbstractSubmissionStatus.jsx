@@ -51,30 +51,40 @@ const AbstractSubmissionStatus = () => {
   // Handle Abstract Updates
   const handleUpdate = async () => {
     setUpdating(true);
+  
     try {
       const formData = new FormData();
-      formData.append("uid", uid);
+      formData.append("uid", uid); // ✅ Send UID
       formData.append("title", updatedAbstract.title);
       formData.append("scope", updatedAbstract.scope);
       formData.append("presentingType", updatedAbstract.presentingType);
-
+      formData.append("firstAuthorName", updatedAbstract.firstAuthorName);
+      formData.append("firstAuthorAffiliation", updatedAbstract.firstAuthorAffiliation);
+      formData.append("otherAuthors", updatedAbstract.otherAuthors);
+      formData.append("presentingAuthorName", updatedAbstract.presentingAuthorName);
+      formData.append("presentingAuthorAffiliation", updatedAbstract.presentingAuthorAffiliation);
+      formData.append("mainBody", updatedAbstract.mainBody);
+  
       if (newFile) {
         formData.append("abstractFile", newFile);
       }
-
-      await axios.put(`https://stisv.onrender.com/update-abstract`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+  
+      await axios.put(
+        `https://stisv.onrender.com/update-abstract`,
+        formData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
       setAbstract(updatedAbstract);
       setEditMode(false);
-      setNewFile(null);
+      setNewFile(null); // ✅ Clear file input after upload
     } catch (error) {
       setError("Error updating abstract.");
     } finally {
       setUpdating(false);
     }
   };
+  
 
   // Handle File Upload
   const handleFileChange = (e) => {
