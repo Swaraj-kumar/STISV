@@ -1,22 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './AbstractSubmission.css';
 
 const AbstractSubmission = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [hasSubmittedAbstract, setHasSubmittedAbstract] = useState(false);
 
   useEffect(() => {
-    // Use sessionStorage to ensure session expires on tab close
     const token = sessionStorage.getItem('token');
+    const uid = sessionStorage.getItem('uid');
+
     if (token) {
       setIsAuthenticated(true);
+      
+      // ✅ Fetch user's abstract submission status
+      axios.get(`https://stisv.onrender.com/get-abstract/${uid}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(response => {
+        if (response.data.abstract) {
+          setHasSubmittedAbstract(true); // ✅ Abstract exists
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching abstract:", error);
+        setHasSubmittedAbstract(false);
+      });
     } else {
       setIsAuthenticated(false);
     }
   }, []);
-  
 
   const handleRedirect = () => {
     if (isAuthenticated) {
@@ -29,7 +45,11 @@ const AbstractSubmission = () => {
     }
   };
 
-  return(
+  const handleViewStatus = () => {
+    navigate('/abstract-status'); // Redirect to Abstract Status page
+  };
+
+  return (
     <div className="abstract-submission-container">
       <h1 className="abstract-title">Submission of Abstract</h1>
       <p>
@@ -37,18 +57,23 @@ const AbstractSubmission = () => {
         including the full postal address on any aspect given in the scope of the conference.
         All abstracts will be peer-reviewed and the authors will be notified accordingly.
       </p>
-      {/* <p>
-        The abstracts may be prepared in MS Word format and sent electronically to the Conference
-        e-mail address <a href="mailto:stis.mte@iisc.ac.in">stis.mte@iisc.ac.in</a>
-      </p> */}
 
-      <button className="submit-abstract-button" onClick={handleRedirect}>
-        Submit Abstract here
-      </button>
-
-      {errorMessage && (
-        <p className="error-message">{errorMessage}</p>
+      {hasSubmittedAbstract ? (
+        <div>
+          <button className="view-status-button" onClick={handleViewStatus}>
+            View Abstract Status
+          </button>
+          <button className="submit-abstract-button" onClick={handleRedirect}>
+            Submit Another Abstract
+          </button>
+        </div>
+      ) : (
+        <button className="submit-abstract-button" onClick={handleRedirect}>
+          Submit Abstract here
+        </button>
       )}
+
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
 
       <h1 className="abstract-title" style={{ marginTop: '20px' }}>Instruction to Authors</h1>
       <ul>
