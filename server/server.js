@@ -350,23 +350,18 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
       from: process.env.EMAIL_USER,
       to: user.email,
       subject: ' Abstract Submission Received Confirmation - STIS-V 2025 Conference',
-      html: `
-      <p>Dear ${user.givenName || user.fullName || "Author"},</p>
-      
-      <p>We are pleased to confirm that we have received your submission successfully.</p>
-      
-      <p><strong>This is the abstract code for your submission: <span style="font-size: 18px; color: #d32f2f;">${user.abstractSubmission.abstractCode}</span></strong></p>
-      
-      <p>This code will be used for all future correspondence regarding your submission.</p>
-  
-      <p>Please note that all submissions will be carefully reviewed, and you can expect to hear from us by <strong>31st May 2025</strong>.</p>
-  
-      <p>We truly appreciate your contribution and look forward to your active participation in the Conference.</p>
-  
-      <p>Thanking you and with best regards,</p>
-  
-      <p><strong>STIS-V 2025 Organizing Team</strong></p>
-    `,
+      text: `Dear ${user.givenName || user.fullName || "Author"},
+
+We are pleased to confirm that we have received your submission successfully.This is the abstract code for your submission: **${abstractCode}**.
+This code will be used for all future corresponence regarding your submission.Please note that all submissions will be carefully reviewed, 
+and you can expect to hear from us by 31st May 2025.We truly appreciate your contribution and look forward to your active participation in 
+the Conference.
+
+Thanking you and with best regards,
+
+STIS-V 2025 Organizing Team
+
+`,
     };
 
     console.log("📨 Sending confirmation email to:", user.email);
