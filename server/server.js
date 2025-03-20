@@ -119,6 +119,8 @@ const userSchema = new mongoose.Schema({
     presentingAuthorAffiliation: { type: String },
     abstractFile: { type: String }, // Stores the file path
     mainBody: { type: String },
+    status: { type: String, default: "Pending" }, // ✅ Stores approval status (Pending, Approved, Rejected)
+    isFinalized: { type: Boolean, default: false },
   }
 });
 
