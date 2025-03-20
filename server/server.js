@@ -419,6 +419,31 @@ try {
   }
 });
 
+app.put("/update-abstract", verifyToken, async (req, res) => {
+  try {
+    const { uid, title, scope, presentingType } = req.body;
+
+    const user = await User.findOneAndUpdate(
+      { uid },
+      {
+        $set: {
+          "abstractSubmission.title": title,
+          "abstractSubmission.scope": scope,
+          "abstractSubmission.presentingType": presentingType,
+        }
+      },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({ message: "Abstract updated successfully", abstract: user.abstractSubmission });
+  } catch (error) {
+    console.error("Error updating abstract:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 
 app.delete("/delete-abstract-file", verifyToken, async (req, res) => {
   try {

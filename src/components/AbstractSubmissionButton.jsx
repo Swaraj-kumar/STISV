@@ -103,33 +103,34 @@ const SubmitAbstractForm = () => {
     setLoading(false); // ✅ move here — only run after fetch is complete
   };
   
+ // ✅ Redirect to Abstract Submission Status Page after successful submission
+ useEffect(() => {
+  if (showSuccessPopup) {
+    setTimeout(() => {
+      navigate("/AbstractSubmissionStatus");
+    }, 3000); // Redirect after 3 seconds
+  }
+}, [showSuccessPopup, navigate]);
 
-
-  const handleBackToHome = () => {
-    navigate("/"); // Navigate to home page
-    setShowSuccessPopup(false);
-  };
-
-  return (
-    <div className="submit-abstract-container">
-      {showSuccessPopup && (
-        <div className="success-popup-overlay">
-          <div className="success-popup">
-            <h2>Success!</h2>
-            <p>Your abstract has been submitted successfully.</p>
-            <button onClick={handleBackToHome} className="back-to-home-btn">
-              Back to Home
-            </button>
-          </div>
+return (
+  <div className="submit-abstract-container">
+    {/* ✅ Success Popup - Auto Redirects after 3 seconds */}
+    {showSuccessPopup && (
+      <div className="success-popup-overlay">
+        <div className="success-popup">
+          <h2>Success!</h2>
+          <p>Abstract submission successful. Redirecting you...</p>
         </div>
-      )}
+      </div>
+    )}
 
-{loading && (
-  <div className="overlay">
-    <div className="loader">Loading...</div>
-    <p style={{ color: "#fff", marginTop: "1rem" }}>Submitting your abstract...</p>
-  </div>
-)}
+    {/* ✅ Loading Overlay */}
+    {loading && (
+      <div className="overlay">
+        <div className="loader">Loading...</div>
+        <p style={{ color: "#fff", marginTop: "1rem" }}>Submitting your abstract...</p>
+      </div>
+    )}
 
 
       <h1>Abstract Submission Form</h1>
