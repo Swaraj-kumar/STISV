@@ -130,6 +130,10 @@ const AbstractSubmissionStatus = () => {
     window.location.href = "https://www.onlinesbi.sbi/sbicollect/";
   };
 
+  const handle = () => {
+    window.location.href = "/home";
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="error-message">{error}</p>;
 
@@ -248,6 +252,18 @@ const AbstractSubmissionStatus = () => {
               Finalize Submission
             </button>
           )}
+
+          {
+            status === "Pending" && (
+              <p className="pending-message">
+                Your abstract is pending review. You will be notified once the review is complete.
+              </p>
+            )
+          }
+
+          <button className="back-button" onClick={() => handle()}>
+            Back to Home
+          </button>
 
           {status === "Approved" && isFinalized && (
             <button className="pay-button" onClick={handlePayment}>
