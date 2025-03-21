@@ -1,0 +1,111 @@
+/* SponsorshipOpportunities.css */
+
+.sponsorship-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9f9;
+  }
+  
+  .sponsorship-heading {
+    font-size: 2.5rem;
+    color: #1a237e;
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 3px solid #1a237e;
+    padding-bottom: 0.5rem;
+  }
+  
+  .sponsorship-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .sponsorship-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-left: 6px solid #1a237e;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .sponsorship-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 10px rgba(0,0,0,0.08);
+  }
+  
+  .sponsorship-card h2 {
+    font-size: 1.5rem;
+    color: #1a237e;
+    margin-bottom: 0.8rem;
+  }
+  
+  .amount {
+    font-size: 1rem;
+    color: #388e3c;
+    font-weight: 600;
+  }
+  
+  .sponsorship-card ul {
+    padding-left: 1.2rem;
+    list-style-type: disc;
+    color: #555;
+  }
+  
+  .sponsorship-card li {
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+  
+  .stall-heading {
+    font-size: 2rem;
+    color: #1a237e;
+    margin-top: 3rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  
+  .stall-description {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #444;
+  }
+  
+  .stall-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  
+  .stall-table th,
+  .stall-table td {
+    border: 1px solid #ddd;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    font-size: 1rem;
+  }
+  
+  .stall-table th {
+    background-color: #1a237e;
+    color: white;
+    font-weight: 600;
+  }
+  
+  .stall-table tr:nth-child(even) {
+    background-color: #f1f1f1;
+  }
+  
+  .stall-note {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 500;
+    text-align: center;
+    margin-top: 2rem;
+  }
+  

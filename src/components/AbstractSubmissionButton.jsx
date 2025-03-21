@@ -23,18 +23,15 @@ const SubmitAbstractForm = () => {
 
   const navigate = useNavigate();
 
-  // ✅ Handle form input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // ✅ Handle file upload change
   const handleFileChange = (e) => {
     setFormData({ ...formData, abstractFile: e.target.files[0] });
   };
 
-  // ✅ Validate form fields
   const validateForm = () => {
     let newErrors = {};
     if (!formData.title) newErrors.title = "Title is required";
@@ -51,19 +48,18 @@ const SubmitAbstractForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // ✅ Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setLoading(true); // Start spinner
+    setLoading(true);
 
     const token = sessionStorage.getItem("token");
     const uid = sessionStorage.getItem("uid");
 
     if (!token || !uid) {
       setMessage("User is not logged in.");
-      setLoading(false); // Stop spinner on failure
+      setLoading(false);
       return;
     }
 
@@ -97,7 +93,6 @@ const SubmitAbstractForm = () => {
         setMessage("Abstract submitted successfully!");
         setShowSuccessPopup(true);
 
-        // ✅ Clear the form and remove file input after successful submission
         setFormData({
           title: "",
           theme: "",
@@ -111,7 +106,6 @@ const SubmitAbstractForm = () => {
           mainBody: "",
         });
 
-        // ✅ Redirect to Status Page after 3 seconds
         setTimeout(() => {
           navigate("/AbstractSubmissionStatus");
         }, 3000);
@@ -123,12 +117,11 @@ const SubmitAbstractForm = () => {
       setMessage("Submission failed. Please try again.");
     }
 
-    setLoading(false); // ✅ Move here — only run after fetch is complete
+    setLoading(false);
   };
 
   return (
     <div className="submit-abstract-container">
-      {/* ✅ Success Popup - Auto Redirects after 3 seconds */}
       {showSuccessPopup && (
         <div className="success-popup-overlay">
           <div className="success-popup">
@@ -138,7 +131,6 @@ const SubmitAbstractForm = () => {
         </div>
       )}
 
-      {/* ✅ Loading Overlay */}
       {loading && (
         <div className="overlay">
           <div className="loader">Loading...</div>
@@ -146,55 +138,57 @@ const SubmitAbstractForm = () => {
         </div>
       )}
 
-      <h1>Abstract Submission Form</h1>
-      <form onSubmit={handleSubmit} className={loading ? "blur" : ""}>
+      <h1 className="form-title">Abstract Submission Form</h1>
+      <form onSubmit={handleSubmit} className={`abstract-form ${loading ? "blur" : ""}`}>
 
-        <label>Title of the Paper *</label>
-        <input type="text" name="title" value={formData.title} onChange={handleChange} required />
-        {errors.title && <span className="error">{errors.title}</span>}
+        <div className="form-group">
+          <label>Title of the Paper *</label>
+          <input type="text" name="title" value={formData.title} onChange={handleChange} required />
+          {errors.title && <span className="error">{errors.title}</span>}
+        </div>
 
-        <label>Theme *</label>
-        <input type="text" name="theme" value={formData.theme} onChange={handleChange} required />
-        {errors.theme && <span className="error">{errors.theme}</span>}
+        <div className="form-group">
+          <label>Theme *</label>
+          <input type="text" name="theme" value={formData.theme} onChange={handleChange} required />
+          {errors.theme && <span className="error">{errors.theme}</span>}
+        </div>
 
-        <label>Mode Of Presentation *</label>
-        <select name="presentingType" value={formData.presentingType} onChange={handleChange} required>
-          <option value="">Select Type</option>
-          <option value="Oral">Oral</option>
-          <option value="Poster">Poster</option>
-        </select>
-        {errors.presentingType && <span className="error">{errors.presentingType}</span>}
+        <div className="form-group">
+          <label>Mode Of Presentation *</label>
+          <select name="presentingType" value={formData.presentingType} onChange={handleChange} required>
+            <option value="">Select Type</option>
+            <option value="Oral">Oral</option>
+            <option value="Poster">Poster</option>
+          </select>
+          {errors.presentingType && <span className="error">{errors.presentingType}</span>}
+        </div>
 
-        <h3>First Author *</h3>
-        <label>Name</label>
-        <input type="text" name="firstAuthorName" value={formData.firstAuthorName} onChange={handleChange} required />
-        {errors.firstAuthorName && <span className="error">{errors.firstAuthorName}</span>}
+        <div className="form-section">
+          <h3>First Author *</h3>
+          <div className="form-group">
+            <label>Name</label>
+            <input type="text" name="firstAuthorName" value={formData.firstAuthorName} onChange={handleChange} required />
+            {errors.firstAuthorName && <span className="error">{errors.firstAuthorName}</span>}
+          </div>
 
-        <label>Affiliation</label>
-        <input type="text" name="firstAuthorAffiliation" value={formData.firstAuthorAffiliation} onChange={handleChange} required />
-        {errors.firstAuthorAffiliation && <span className="error">{errors.firstAuthorAffiliation}</span>}
+          <div className="form-group">
+            <label>Affiliation</label>
+            <input type="text" name="firstAuthorAffiliation" value={formData.firstAuthorAffiliation} onChange={handleChange} required />
+            {errors.firstAuthorAffiliation && <span className="error">{errors.firstAuthorAffiliation}</span>}
+          </div>
+        </div>
 
-        <h3>Other Author(s), if any</h3>
-        <label>Names & Affiliations (if multiple, separate by comma)</label>
-        <textarea name="otherAuthors" value={formData.otherAuthors} onChange={handleChange} />
+        <div className="form-group">
+          <label>Abstract File Submission *</label>
+          <input type="file" name="abstractFile" onChange={handleFileChange} accept=".pdf,.doc,.docx" required />
+          {errors.abstractFile && <span className="error">{errors.abstractFile}</span>}
+        </div>
 
-        <h3>Presenting Author *</h3>
-        <label>Name</label>
-        <input type="text" name="presentingAuthorName" value={formData.presentingAuthorName} onChange={handleChange} required />
-        {errors.presentingAuthorName && <span className="error">{errors.presentingAuthorName}</span>}
-
-        <label>Affiliation</label>
-        <input type="text" name="presentingAuthorAffiliation" value={formData.presentingAuthorAffiliation} onChange={handleChange} required />
-        {errors.presentingAuthorAffiliation && <span className="error">{errors.presentingAuthorAffiliation}</span>}
-
-
-        <label>Abstract File Submission *</label>
-        <input type="file" name="abstractFile" onChange={handleFileChange} accept=".pdf,.doc,.docx" required />
-        {errors.abstractFile && <span className="error">{errors.abstractFile}</span>}
-
-        <label>Main Body of Abstract *</label>
-        <textarea name="mainBody" value={formData.mainBody} onChange={handleChange} required></textarea>
-        {errors.mainBody && <span className="error">{errors.mainBody}</span>}
+        <div className="form-group">
+          <label>Main Body of Abstract *</label>
+          <textarea name="mainBody" value={formData.mainBody} onChange={handleChange} required></textarea>
+          {errors.mainBody && <span className="error">{errors.mainBody}</span>}
+        </div>
 
         <div className="form-buttons">
           <button type="submit" disabled={loading}>Submit</button>

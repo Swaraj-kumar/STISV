@@ -170,6 +170,17 @@ function Navbar() {
 
           </div>
         </li>
+
+
+        <li>
+  <NavLink
+    to="/SponsorshipOpportunities"
+    className="navbar-link"
+    onClick={() => handleDropdownClick("/SponsorshipOpportunities")}
+  >
+    Sponsorship Opportunities
+  </NavLink>
+</li>
         <li
           className="navbar-dropdown"
           onMouseEnter={() => handleMouseEnter("registration")}

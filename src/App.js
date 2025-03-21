@@ -48,6 +48,8 @@ import ChairmanMessage from "./components/ChairmanMessage"; // update the path i
 import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./components/AdminDashboard";
 
+import SponsorshipOpportunities from './components/SponsorshipOpportunities';
+
 // Router configuration with future flags to remove warnings
 const router = createHashRouter(
   createRoutesFromElements(
@@ -94,6 +96,8 @@ const router = createHashRouter(
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/admin-dashboard" element={<AdminDashboard/>} />
       
+      <Route path="/SponsorshipOpportunities" element={<SponsorshipOpportunities />} />
+
     </Route>
   ),
   {
