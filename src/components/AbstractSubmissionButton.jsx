@@ -191,7 +191,7 @@ const SubmitAbstractForm = () => {
         </div>
 
         <div className="form-buttons">
-          <button type="submit" disabled={loading}>Submit</button>
+          <button type="submit" disabled={loading} onClick={handleSubmit}>Submit</button>
         </div>
       </form>
 
