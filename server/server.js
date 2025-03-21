@@ -68,7 +68,10 @@ const upload = multer({
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: "*", credentials: true }));
+app.use(cors({
+  origin: 'https://materials.iisc.ac.in', "https://stisv-1.onrender.com", "http://localhost:3000/",
+  credentials: true // Only if you're using cookies, sessions, or tokens
+}));
 
 
 // Middleware to verify JWT token
