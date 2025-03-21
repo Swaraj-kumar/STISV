@@ -20,13 +20,11 @@
 
 .home-content {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  left: 20%; /* Adjusted from -50% to -10vh */
+  right: 20%;
   text-align: center;
-  color: white;
-  padding: 4rem 2rem; /* Increased vertical padding */
-  margin: 2rem 0; /* Added vertical margin */
+  color: white; /* Increased vertical padding */
+  margin: -10rem 0.5rem; /* Added vertical margin */
   background: rgba(0, 0, 0, 0.4);
   border-radius: 15px;
   backdrop-filter: blur(2px);
@@ -34,7 +32,7 @@
   opacity: 0;
   animation: fade-in 1.5s ease forwards;
   max-height: 90vh; /* Prevent content from overflowing viewport */
-  overflow-y: auto; /* Add scrolling if content is too long */
+  overflow-y: hidden; /* Add scrolling if content is too long */
 }
 
 .home-title {
