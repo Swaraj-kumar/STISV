@@ -72,7 +72,7 @@ const allowedOrigins = [
   'http://localhost:3000',             
   'https://materials.iisc.ac.in', 
   'https://stisv-1.onrender.com', 
-  'https://stisv.vercel.app/' , 
+  'https://stisv.vercel.app' , 
 ];
 
 app.use(cors({
