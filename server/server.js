@@ -71,8 +71,7 @@ app.use(express.json());
 const allowedOrigins = [
   'http://localhost:3000',             
   'https://materials.iisc.ac.in', 
-  'https://stisv-1.onrender.com', 
-  'https://stisv.vercel.app' , 
+  'https://stisv-1.onrender.com',   
 ];
 
 app.use(cors({
@@ -563,6 +562,59 @@ app.put("/update-abstract", verifyToken, upload.single("abstractFile"), async (r
     }
 
     res.json({ message: "Abstract updated successfully", abstract: user.abstractSubmission });
+
+    // ✅ Send update confirmation email to user
+const updateMailOptions = {
+  from: process.env.EMAIL_USER,
+  to: user.email,
+  subject: 'Abstract Update Confirmation - STIS-V 2025',
+  text: `Dear ${user.givenName || user.fullName || "Participant"},
+
+Your abstract has been successfully updated in the STIS-V 2025 system.
+
+You can download your updated abstract from the following link:
+${user.abstractSubmission.abstractFile}
+
+If you did not request this update or have any concerns, please contact the organizing team at stis.mte@iisc.ac.in.
+
+Best regards,  
+STIS-V 2025 Organizing Committee`,
+};
+
+try {
+  await transporter.sendMail(updateMailOptions);
+  console.log("✅ Abstract update confirmation sent to user:", user.email);
+} catch (emailErr) {
+  console.error("❌ Failed to send user abstract update email:", emailErr.message);
+}
+
+// ✅ Also notify admin
+const adminUpdateMail = {
+  from: process.env.EMAIL_USER,
+  to: "stis.mte@iisc.ac.in",
+  subject: `Abstract Updated by ${user.fullName}`,
+  text: `The following participant has updated their abstract:
+
+Name: ${user.fullName}
+Email: ${user.email}
+UID: ${user.uid}
+
+Updated Abstract Link:
+${user.abstractSubmission.abstractFile}
+
+Please verify and review the submission in the admin panel.
+
+Regards,  
+STIS-V Submission System`,
+};
+
+try {
+  await transporter.sendMail(adminUpdateMail);
+  console.log("✅ Abstract update notification sent to admin.");
+} catch (adminErr) {
+  console.error("❌ Failed to send admin update email:", adminErr.message);
+}
+
 
   } catch (error) {
     console.error("❌ Error updating abstract:", error);
