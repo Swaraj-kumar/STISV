@@ -73,6 +73,7 @@ const allowedOrigins = [
   'https://materials.iisc.ac.in', 
   'https://stisv-1.onrender.com', 
   'https://stisv.vercel.app',
+  'https://stis-final.vercel.app',
 ];
 
 app.use(cors({
