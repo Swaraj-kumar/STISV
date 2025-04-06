@@ -71,9 +71,8 @@ app.use(express.json());
 const allowedOrigins = [
   'http://localhost:3000',             
   'https://materials.iisc.ac.in', 
-  'https://stisv-1.onrender.com', 
-  'https://stisv.vercel.app',
-  'https://stis-final.vercel.app',
+  'https://stisv-1.onrender.com',  
+  'https://stisv.vercel.app', 
 ];
 
 app.use(cors({
@@ -653,7 +652,7 @@ app.post("/admin/login", async (req, res) => {
 
 app.put("/admin/update-abstract-status", verifyAdminToken, async (req, res) => {
   try {
-    const { uid, status } = req.body;
+    const { uid, status, remarks } = req.body;
 
     if (!uid || !status) {
       return res.status(400).json({ message: "UID and status are required." });
@@ -665,7 +664,12 @@ app.put("/admin/update-abstract-status", verifyAdminToken, async (req, res) => {
 
     const user = await User.findOneAndUpdate(
       { uid },
-      { $set: { "abstractSubmission.status": status } },
+      {
+        $set: {
+          "abstractSubmission.status": status,
+          "abstractSubmission.remarks": remarks || "", // ✅ Save remarks
+        },
+      },
       { new: true }
     );
 
@@ -673,23 +677,33 @@ app.put("/admin/update-abstract-status", verifyAdminToken, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Send Email Notification to User
+    // ✅ Compose email message
+    let emailText = `Dear ${user.fullName},\n\nYour abstract submission has been **${status}**.\n`;
+
+    if (status === "Rejected" && remarks) {
+      emailText += `\nRemarks from reviewers:\n"${remarks}"\n`;
+    }
+
+    emailText += `\nThank you for your participation!\n\nBest Regards,\nSTIS-V 2025 Team`;
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
       subject: `Abstract Submission Status - STIS-V 2025`,
-      text: `Dear ${user.fullName},\n\nYour abstract submission has been **${status}**.\n\nThank you for your participation!\n\nBest Regards,\nSTIS-V 2025 Team`,
+      text: emailText,
     };
 
     await transporter.sendMail(mailOptions);
     console.log(`✅ Email sent to ${user.email} for status update: ${status}`);
 
     res.json({ message: `Abstract ${status} successfully`, user });
+
   } catch (error) {
     console.error("Error updating abstract status:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
+
 
 
 
