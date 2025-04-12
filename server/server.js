@@ -868,28 +868,21 @@ app.get("/get-abstracts-by-user/:uid", verifyToken, async (req, res) => {
 
 // ✅ Get abstract by UID + Abstract Code
 app.get("/get-abstract-by-code/:uid/:code", verifyToken, async (req, res) => {
+  const { uid, code } = req.params;
   try {
-    const { uid, code } = req.params;
-
     const user = await User.findOne({ uid });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    const abstract = user.abstractSubmissions.find(
-      abs => abs.abstractCode === code
-    );
+    const abstract = user.abstractSubmissions.find(abs => abs.abstractCode === code);
+    if (!abstract) return res.status(404).json({ message: "Abstract not found" });
 
-    if (!abstract) {
-      return res.status(404).json({ message: "Abstract not found" });
-    }
-
-    return res.status(200).json({ abstract });
+    res.status(200).json({ abstract });
   } catch (error) {
-    console.error("❌ Error fetching abstract by code:", error);
-    return res.status(500).json({ message: "Server error", error: error.message });
+    console.error("❌ Error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
+
 
 
 
