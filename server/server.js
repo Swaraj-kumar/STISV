@@ -805,12 +805,13 @@ app.get("/get-abstract/:uid", verifyToken, async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json({ abstract: user.abstractSubmission });
+    res.json({ abstracts: user.abstractSubmissions });  // ✅ return abstracts (plural)
   } catch (error) {
     console.error("Error fetching abstract:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
+
 
 
 // Delete Abstract File
