@@ -626,7 +626,8 @@ const adminUpdateMail = {
 
 Name: ${user.fullName}
 Email: ${user.email}
-UID: ${user.uid}
+Abstract Code: ${user.abstractSubmissions[abstractIndex].abstractCode}
+Abstract Title: ${user.abstractSubmissions[abstractIndex].title}
 
 Updated Abstract Link:
 ${user.abstractSubmissions[abstractIndex].abstractFile}
