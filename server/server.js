@@ -329,33 +329,34 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
 
     const abstractCode = generateAbstractCode();
 
-    const uploadToCloudinary = () => {
+   const uploadToCloudinary = () => {
   return new Promise((resolve, reject) => {
-    const originalName = req.file.originalname; // e.g., MyAbstract.docx
+    const originalName = req.file.originalname;
 
     const stream = cloudinary.uploader.upload_stream(
       {
-        resource_type: "raw",            // ✅ For .docx, .pdf, etc.
-        folder: "abstracts",             // ✅ Optional folder
-        use_filename: true,              // ✅ Use uploaded name
-        unique_filename: false,          // ✅ Prevent Cloudinary hash
+        resource_type: "raw",
+        folder: "abstracts",
+        use_filename: true,
+        unique_filename: false,
       },
       (error, result) => {
-        if (error) reject(error);
-        else {
-          // 🔗 Force download link (optional)
-          result.download_url = result.secure_url.replace(
-            "/upload/",
-            `/upload/fl_attachment:${originalName}/`
-          );
-          resolve(result);
-        }
+        if (error) return reject(error);
+
+        const download_url = result.secure_url.replace(
+          "/upload/",
+          `/upload/fl_attachment:${originalName}/`
+        );
+
+        // Only return the forced download link
+        resolve({ download_url });
       }
     );
 
     stream.end(req.file.buffer);
   });
 };
+
 
 
 
@@ -380,7 +381,7 @@ const newAbstract = {
   otherAuthors,
   presentingAuthorName,
   presentingAuthorAffiliation,
-  abstractFile: cloudinaryResult.secure_url,
+  abstractFile: cloudinaryResult.download_url,
   mainBody,
   abstractCode,
   isFinalized: false,
@@ -448,7 +449,7 @@ Presenting Type: ${presentingType}
 First Author: ${firstAuthorName} (${firstAuthorAffiliation})
 Other Authors: ${otherAuthors}
 Presenting Author: ${presentingAuthorName} (${presentingAuthorAffiliation})
-Abstract Link: ${cloudinaryResult.secure_url}
+Abstract Link: ${cloudinaryResult.download_url}
 
 Main Body:
 ${mainBody}
@@ -567,8 +568,8 @@ app.put("/update-abstract", verifyToken, upload.single("abstractFile"), async (r
       };
 
       const cloudinaryResult = await uploadToCloudinary();
-      updateData["abstractSubmission.abstractFile"] = cloudinaryResult.secure_url;
-      console.log(`✅ New File Uploaded: ${cloudinaryResult.secure_url}`);
+      updateData["abstractSubmission.abstractFile"] = cloudinaryResult.download_url;
+      console.log(`✅ New File Uploaded: ${cloudinaryResult.download_url}`);
       googleSheetUpdateRequired = true;
     }
 
