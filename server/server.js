@@ -328,29 +328,36 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
     };
 
     const abstractCode = generateAbstractCode();
-    const originalName = path.parse(req.file.originalname).name;
-    const extension = path.extname(req.file.originalname);
-    const finalFileName = originalName + extension; 
-    
-    // Upload to Cloudinary
-  const uploadToCloudinary = () => {
+
+    const path = require("path");
+
+const uploadToCloudinary = () => {
   return new Promise((resolve, reject) => {
+    const originalName = req.file.originalname;
+    const fileExt = path.extname(originalName); // e.g., ".docx"
+    const baseName = path.basename(originalName, fileExt); // e.g., "MyAbstract"
+
+    // Optional: Add timestamp to avoid overwrite
+    const finalFileName = `${Date.now()}_${baseName}${fileExt}`;
+
     const stream = cloudinary.uploader.upload_stream(
       {
-        resource_type: "auto",
+        resource_type: "raw", // ✅ must be "raw" for .docx
         folder: "abstracts",
         use_filename: true,
         unique_filename: false,
-        public_id: finalFileName // complete name with extension
+        public_id: finalFileName, // ✅ full name with extension
       },
       (error, result) => {
         if (error) reject(error);
         else resolve(result);
       }
     );
+
     stream.end(req.file.buffer);
   });
 };
+
 
 const cloudinaryResult = await uploadToCloudinary();
 
