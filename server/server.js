@@ -150,17 +150,6 @@ const userSchema = new mongoose.Schema({
     isFinalized: { type: Boolean, default: false },
     remarks: String,
     timestamp: String,
-  }],
-
-  payments: [{
-    paymentId: { type: String, required: true },
-    amount: { type: Number, required: true },
-    currency: { type: String, required: true },
-    type: { type: String, required: true }, // e.g., Delegate, Author, etc.
-    region: { type: String, required: true }, // Indian or Foreigner
-    email: { type: String },
-    name: { type: String },
-    timestamp: { type: String },
   }]
 });
 
@@ -273,117 +262,6 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
-
-app.post("/save-payment", async (req, res) => {
-  try {
-    const { uid, paymentId, amount, currency, type, region, email, name } = req.body;
-
-    if (!uid || !paymentId || !amount || !currency) {
-      return res.status(400).json({ message: "Missing required payment fields." });
-    }
-
-    const user = await User.findOne({ uid });
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const paymentEntry = {
-      paymentId,
-      amount,
-      currency,
-      type,
-      region,
-      email,
-      name,
-      timestamp: new Date().toISOString(),
-    };
-
-    if (!user.payments) user.payments = [];
-    user.payments.push(paymentEntry);
-    await user.save();
-
-    res.json({ message: "Payment saved successfully." });
-  } catch (error) {
-    console.error("❌ Error saving payment:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-app.post("/webhook-razorpay", express.json({
-  verify: (req, res, buf) => {
-    req.rawBody = buf.toString(); // Needed for verifying signature
-  }
-}), async (req, res) => {
-  const crypto = require("crypto");
-
-  const signature = req.headers["x-razorpay-signature"];
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-
-  // Calculate expected signature
-  const expectedSignature = crypto.createHmac("sha256", secret)
-    .update(req.rawBody)
-    .digest("hex");
-
-  // Compare signatures
-  if (signature !== expectedSignature) {
-    return res.status(400).send("❌ Invalid signature");
-  }
-
-  const payload = req.body;
-
-  if (payload.event === "payment.captured") {
-    const payment = payload.payload.payment.entity;
-
-    const {
-      id: paymentId,
-      amount,
-      currency,
-      email,
-      contact,
-      notes
-    } = payment;
-
-    const uid = notes?.uid;
-    const type = notes?.type || "Unknown";
-    const region = notes?.region || "Unknown";
-    const name = notes?.name || "Participant";
-
-    try {
-      const user = await User.findOne({ uid });
-      if (!user) return res.status(404).send("User not found");
-
-      const paymentEntry = {
-        paymentId,
-        amount: amount / 100, // Convert from paise
-        currency,
-        type,
-        region,
-        email,
-        name,
-        timestamp: new Date().toISOString()
-      };
-
-      user.payments.push(paymentEntry);
-      await user.save();
-
-      // Optionally send email confirmation
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "Payment Confirmation - STIS-V 2025",
-        text: `Hello ${name},\n\nWe have received your payment successfully!\n\nPayment ID: ${paymentId}\nAmount: ${paymentEntry.amount} ${currency}\n\nSTIS-V 2025 Team`
-      };
-
-      await transporter.sendMail(mailOptions);
-
-      return res.status(200).json({ status: "ok" });
-    } catch (error) {
-      console.error("Error handling webhook:", error);
-      return res.status(500).send("Internal error");
-    }
-  }
-
-  res.status(200).json({ status: "ignored" });
-});
-
 
 
 // Reset Password Route
