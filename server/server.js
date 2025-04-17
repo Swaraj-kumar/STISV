@@ -328,9 +328,12 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
     };
 
     const abstractCode = generateAbstractCode();
-
+    const originalName = path.parse(req.file.originalname).name;
+    const extension = path.extname(req.file.originalname);
+    const finalFileName = originalName + extension; 
+    
     // Upload to Cloudinary
-   const uploadToCloudinary = () => {
+  const uploadToCloudinary = () => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
@@ -338,7 +341,7 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
         folder: "abstracts",
         use_filename: true,
         unique_filename: false,
-       public_id: req.file.originalname
+        public_id: finalFileName // complete name with extension
       },
       (error, result) => {
         if (error) reject(error);
