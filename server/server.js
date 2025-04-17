@@ -329,25 +329,34 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
 
     const abstractCode = generateAbstractCode();
 
-const uploadToCloudinary = () => {
+    const uploadToCloudinary = () => {
   return new Promise((resolve, reject) => {
+    const originalName = req.file.originalname; // e.g., MyAbstract.docx
+
     const stream = cloudinary.uploader.upload_stream(
       {
-        resource_type: "raw", // ✅ Required for .docx
-        folder: "abstracts",   // ✅ Optional folder path
-        use_filename: true,   // ✅ Use the uploaded file name
-        unique_filename: false, // ✅ Don't add random characters
-        
+        resource_type: "raw",            // ✅ For .docx, .pdf, etc.
+        folder: "abstracts",             // ✅ Optional folder
+        use_filename: true,              // ✅ Use uploaded name
+        unique_filename: false,          // ✅ Prevent Cloudinary hash
       },
       (error, result) => {
         if (error) reject(error);
-        else resolve(result); // contains secure_url, original_filename etc.
+        else {
+          // 🔗 Force download link (optional)
+          result.download_url = result.secure_url.replace(
+            "/upload/",
+            `/upload/fl_attachment:${originalName}/`
+          );
+          resolve(result);
+        }
       }
     );
 
     stream.end(req.file.buffer);
   });
 };
+
 
 
 
