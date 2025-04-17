@@ -330,20 +330,27 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
     const abstractCode = generateAbstractCode();
 
     // Upload to Cloudinary
-    const uploadToCloudinary = () => {
-      return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { resource_type: "auto", folder: "abstracts" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        stream.end(req.file.buffer);
-      });
-    };
+   const uploadToCloudinary = () => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: "auto",
+        folder: "abstracts",
+        use_filename: true,
+        unique_filename: false,
+        public_id: req.file.originalname.split('.')[0] // optional: to avoid extension duplication
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    stream.end(req.file.buffer);
+  });
+};
 
-    const cloudinaryResult = await uploadToCloudinary();
+const cloudinaryResult = await uploadToCloudinary();
+
 
     // Update user's abstractSubmission in DB
     const user = await User.findOne({ uid });
