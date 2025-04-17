@@ -338,7 +338,7 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
         folder: "abstracts",
         use_filename: true,
         unique_filename: false,
-        public_id: req.file.originalname.split('.')[0] // optional: to avoid extension duplication
+       public_id: req.file.originalname
       },
       (error, result) => {
         if (error) reject(error);
