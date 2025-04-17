@@ -72,7 +72,8 @@ app.use(cors({
     'http://localhost:3000',              // local dev
     'https://materials.iisc.ac.in',       // IISc domain
     'https://stisv-1.onrender.com',       // old Render app (if used)
-    'https://stisv.vercel.app'            // current frontend
+    'https://stisv.vercel.app',
+    'https://stisv.onrender.com', // current frontend
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
