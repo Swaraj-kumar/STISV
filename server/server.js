@@ -381,7 +381,7 @@ const newAbstract = {
   otherAuthors,
   presentingAuthorName,
   presentingAuthorAffiliation,
-  abstractFile: abstractFile: cloudinaryResult.download_url,
+  abstractFile:  cloudinaryResult.download_url,
   mainBody,
   abstractCode,
   isFinalized: false,
