@@ -350,7 +350,8 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
           // ✅ Generate forced-download URL with correct file name
           
 
-          const downloadUrl = result.secure_url; // ✅ original Cloudinary URL
+          result.download_url = result.secure_url;
+
 
           resolve(result);
         }
