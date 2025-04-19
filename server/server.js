@@ -330,29 +330,39 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
 
     const abstractCode = generateAbstractCode();
 
+   const uploadToCloudinary = () => {
+    return new Promise((resolve, reject) => {
     const originalName = req.file.originalname; // e.g. MyAbstract.docx
 
-const stream = cloudinary.uploader.upload_stream(
-  {
-    resource_type: "raw",
-    folder: "abstracts",
-    use_filename: true,
-    unique_filename: false,
-    public_id: originalName, // <-- include extension here
-  },
-  (error, result) => {
-    if (error) reject(error);
-    else {
-      // ✅ This will now work!
-      const downloadUrl = result.secure_url.replace(
-        "/upload/",
-        `/upload/fl_attachment:${encodeURIComponent(originalName)}/`
-      );
-      result.download_url = downloadUrl;
-      resolve(result);
-    }
-  }
-);
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: "raw",              // ✅ Required for .docx, .pdf, etc.
+        folder: "abstracts",               // ✅ Optional folder
+        use_filename: true,                // ✅ Use original file name
+        unique_filename: false,            // ✅ Prevent random string
+        public_id: originalName,           // ✅ Keep full name including extension
+        overwrite: true                    // ✅ Avoid conflict on same name
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          // ✅ Generate forced-download URL with correct file name
+          const downloadUrl = result.secure_url.replace(
+            "/upload/",
+            `/upload/fl_attachment:${encodeURIComponent(originalName)}/`
+          );
+
+          result.download_url = downloadUrl;
+          resolve(result);
+        }
+      }
+    );
+
+    stream.end(req.file.buffer);
+  });
+};
+
 
     const cloudinaryResult = await uploadToCloudinary();
 
@@ -373,7 +383,7 @@ const newAbstract = {
   otherAuthors,
   presentingAuthorName,
   presentingAuthorAffiliation,
-  abstractFile: cloudinaryResult.secure_url,
+  abstractFile: cloudinaryResult.download_url,
   mainBody,
   abstractCode,
   isFinalized: false,
@@ -441,7 +451,7 @@ Presenting Type: ${presentingType}
 First Author: ${firstAuthorName} (${firstAuthorAffiliation})
 Other Authors: ${otherAuthors}
 Presenting Author: ${presentingAuthorName} (${presentingAuthorAffiliation})
-Abstract Link: ${cloudinaryResult.secure_url}
+Abstract Link: ${cloudinaryResult.download_url}
 
 Main Body:
 ${mainBody}
@@ -560,8 +570,8 @@ app.put("/update-abstract", verifyToken, upload.single("abstractFile"), async (r
       };
 
       const cloudinaryResult = await uploadToCloudinary();
-      updateData["abstractSubmission.abstractFile"] = cloudinaryResult.secure_url;
-      console.log(`✅ New File Uploaded: ${cloudinaryResult.secure_url}`);
+      updateData["abstractSubmission.abstractFile"] = cloudinaryResult.download_url;
+      console.log(`✅ New File Uploaded: ${cloudinaryResult.download_url}`);
       googleSheetUpdateRequired = true;
     }
 
