@@ -348,12 +348,10 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
           reject(error);
         } else {
           // ✅ Generate forced-download URL with correct file name
-          const downloadUrl = result.secure_url.replace(
-            "/upload/",
-            `/upload/fl_attachment:${encodeURIComponent(originalName)}/`
-          );
+          
 
-          result.download_url = downloadUrl;
+          const downloadUrl = result.secure_url; // ✅ original Cloudinary URL
+
           resolve(result);
         }
       }
