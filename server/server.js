@@ -332,42 +332,17 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
 
     // Upload to Cloudinary
     const uploadToCloudinary = () => {
-  return new Promise((resolve, reject) => {
-    const originalName = req.file.originalname; // e.g. Abstract-Template (28).docx
-
-    // Extract clean public_id (without extension)
-    const fileBaseName = path.parse(originalName).name;
-    const extension = path.extname(originalName); // .docx
-
-    // Manually encode filename (spaces to underscores, remove parens etc.)
-    const safeFilename = fileBaseName.replace(/[^a-zA-Z0-9_-]/g, "_") + extension;
-
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: "raw",
-        folder: "abstracts",
-        use_filename: true,
-        unique_filename: false,
-        public_id: fileBaseName, // without extension
-      },
-      (error, result) => {
-        if (error) reject(error);
-        else {
-          const downloadUrl = result.secure_url.replace(
-            "/upload/",
-            `/upload/fl_attachment:${safeFilename}/`
-          );
-          result.download_url = downloadUrl;
-          resolve(result);
-        }
-      }
-    );
-
-    stream.end(req.file.buffer);
-  });
-};
-
-
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "auto", folder: "abstracts" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+    };
 
     const cloudinaryResult = await uploadToCloudinary();
 
@@ -388,7 +363,7 @@ const newAbstract = {
   otherAuthors,
   presentingAuthorName,
   presentingAuthorAffiliation,
-  abstractFile:  cloudinaryResult.download_url,
+  abstractFile: cloudinaryResult.secure_url,
   mainBody,
   abstractCode,
   isFinalized: false,
