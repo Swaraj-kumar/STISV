@@ -330,19 +330,29 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
 
     const abstractCode = generateAbstractCode();
 
-    // Upload to Cloudinary
-    const uploadToCloudinary = () => {
-      return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { resource_type: "auto", folder: "abstracts" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        stream.end(req.file.buffer);
-      });
-    };
+    const originalName = req.file.originalname; // e.g. MyAbstract.docx
+
+const stream = cloudinary.uploader.upload_stream(
+  {
+    resource_type: "raw",
+    folder: "abstracts",
+    use_filename: true,
+    unique_filename: false,
+    public_id: originalName, // <-- include extension here
+  },
+  (error, result) => {
+    if (error) reject(error);
+    else {
+      // ✅ This will now work!
+      const downloadUrl = result.secure_url.replace(
+        "/upload/",
+        `/upload/fl_attachment:${encodeURIComponent(originalName)}/`
+      );
+      result.download_url = downloadUrl;
+      resolve(result);
+    }
+  }
+);
 
     const cloudinaryResult = await uploadToCloudinary();
 
