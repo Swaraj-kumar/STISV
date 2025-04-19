@@ -48,14 +48,14 @@ const storage = multer.memoryStorage();
 const uploads = multer({ storage: storage });
 // File filter function
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  // Accept only PDF and Word documents
+  const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only Word documents (.doc/.docx) are allowed.'), false);
+    cb(new Error('Invalid file type. Only PDF and Word documents are allowed.'), false);
   }
 };
-
 
 const upload = multer({ 
   storage: storage,
@@ -330,32 +330,19 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
 
     const abstractCode = generateAbstractCode();
 
-  const streamifier = require("streamifier");
-
-const uploadToCloudinary = () => {
-  return new Promise((resolve, reject) => {
-    const fileExt = path.extname(req.file.originalname); // e.g., .docx
-    const fileName = path.basename(req.file.originalname, fileExt); // e.g., Abstract
-
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: "raw",
-        folder: "abstracts",
-        public_id: fileName,
-        use_filename: true,
-        unique_filename: false,
-        overwrite: true
-      },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      }
-    );
-
-    streamifier.createReadStream(req.file.buffer).pipe(stream);
-  });
-};
-
+    // Upload to Cloudinary
+    const uploadToCloudinary = () => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "auto", folder: "abstracts" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+    };
 
     const cloudinaryResult = await uploadToCloudinary();
 
@@ -552,29 +539,15 @@ app.put("/update-abstract", verifyToken, upload.single("abstractFile"), async (r
     if (req.file) {
       console.log("📎 Uploading new abstract file...");
 
-      const streamifier = require("streamifier");
-
-const uploadToCloudinary = () => {
-  return new Promise((resolve, reject) => {
-    const fileExt = path.extname(req.file.originalname);
-    const fileName = path.basename(req.file.originalname, fileExt);
-
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: "raw",
-        folder: "abstracts",
-        public_id: fileName,
-        use_filename: true,
-        unique_filename: false,
-        overwrite: true
-      },
-      (error, result) => (error ? reject(error) : resolve(result))
-    );
-
-    streamifier.createReadStream(req.file.buffer).pipe(stream);
-  });
-};
-
+      const uploadToCloudinary = () => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { resource_type: "auto", folder: "abstracts" },
+            (error, result) => (error ? reject(error) : resolve(result))
+          );
+          stream.end(req.file.buffer);
+        });
+      };
 
       const cloudinaryResult = await uploadToCloudinary();
       updateData["abstractSubmission.abstractFile"] = cloudinaryResult.secure_url;
