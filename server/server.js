@@ -333,8 +333,14 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
     // Upload to Cloudinary
     const uploadToCloudinary = () => {
   return new Promise((resolve, reject) => {
-    const originalName = req.file.originalname; // e.g., MyAbstract.docx
-    const fileBaseName = originalName.split('.')[0]; // MyAbstract
+    const originalName = req.file.originalname; // e.g. Abstract-Template (28).docx
+
+    // Extract clean public_id (without extension)
+    const fileBaseName = path.parse(originalName).name;
+    const extension = path.extname(originalName); // .docx
+
+    // Manually encode filename (spaces to underscores, remove parens etc.)
+    const safeFilename = fileBaseName.replace(/[^a-zA-Z0-9_-]/g, "_") + extension;
 
     const stream = cloudinary.uploader.upload_stream(
       {
@@ -342,24 +348,25 @@ app.post("/submit-abstract", verifyToken, upload.single("abstractFile"), async (
         folder: "abstracts",
         use_filename: true,
         unique_filename: false,
-        public_id: fileBaseName // ✅ name without extension
+        public_id: fileBaseName, // without extension
       },
       (error, result) => {
         if (error) reject(error);
         else {
-          // ✅ Add .docx back to force filename with extension
-          const forcedDownloadLink = result.secure_url.replace(
+          const downloadUrl = result.secure_url.replace(
             "/upload/",
-            `/upload/fl_attachment:${fileBaseName}.docx/`
+            `/upload/fl_attachment:${safeFilename}/`
           );
-          result.download_url = forcedDownloadLink;
+          result.download_url = downloadUrl;
           resolve(result);
         }
       }
     );
+
     stream.end(req.file.buffer);
   });
 };
+
 
 
     const cloudinaryResult = await uploadToCloudinary();
