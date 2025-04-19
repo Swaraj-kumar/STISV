@@ -523,13 +523,14 @@ app.post("/submit-query", async (req, res) => {
 
 app.get("/get-all-abstracts", async (req, res) => {
   try {
-    const abstracts = await User.find({}, "uid fullName email abstractSubmission");
+    const abstracts = await User.find({}, "uid fullName email abstractSubmissions"); // ← FIXED HERE
     res.json({ abstracts });
   } catch (error) {
     console.error("Error fetching abstracts:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 
