@@ -555,24 +555,38 @@ app.put("/update-abstract", verifyToken, upload.single("abstractFile"), async (r
     });
 
     // ✅ Handle File Upload
-    if (req.file) {
-      console.log("📎 Uploading new abstract file...");
+  if (req.file) {
+  console.log("📎 Uploading new abstract file...");
 
-      const uploadToCloudinary = () => {
-        return new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { resource_type: "auto", folder: "abstracts" },
-            (error, result) => (error ? reject(error) : resolve(result))
-          );
-          stream.end(req.file.buffer);
-        });
-      };
+  const uploadToCloudinary = () => {
+    return new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          resource_type: "raw",
+          folder: "abstracts",
+          use_filename: true,
+          unique_filename: false,
+          public_id: req.file.originalname,
+          overwrite: true
+        },
+        (error, result) => {
+          if (error) return reject(error);
 
-      const cloudinaryResult = await uploadToCloudinary();
-      updateData["abstractSubmission.abstractFile"] = cloudinaryResult.download_url;
-      console.log(`✅ New File Uploaded: ${cloudinaryResult.download_url}`);
-      googleSheetUpdateRequired = true;
-    }
+          // ✅ Set download_url from secure_url
+          result.download_url = result.secure_url;
+          resolve(result);
+        }
+      );
+      stream.end(req.file.buffer);
+    });
+  };
+
+  const cloudinaryResult = await uploadToCloudinary();
+  updateData["abstractSubmission.abstractFile"] = cloudinaryResult.download_url;
+  console.log(`✅ New File Uploaded: ${cloudinaryResult.download_url}`);
+  googleSheetUpdateRequired = true;
+}
+
 
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ message: "No valid fields provided for update." });
